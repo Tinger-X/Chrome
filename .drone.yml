@@ -4,7 +4,7 @@ name: chrome
 
 steps:
   - name: remove
-    image: python:latest
+    image: python:3.8
     commands:
       - docker stop $(docker ps -qf name=Chrome)
       - docker rm $(docker ps -qf name=Chrome)

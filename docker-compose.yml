@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  Chrome:
+    build: .
+    image: chrome:latest
+    container_name: Chrome
+    restart: always
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /srv/Docker/chrome/:/srv/Chrome/
+    command: ["gunicorn", "app:app", "-c", "gunicorn.conf.py"]

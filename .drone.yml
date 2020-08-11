@@ -1,0 +1,13 @@
+kind: pipeline
+type: docker
+name: chrome
+
+steps:
+  - name: remove
+    commands:
+      - docker stop $(docker ps -qf name=Chrome)
+      - docker rm $(docker ps -qf name=Chrome)
+      - docker rmi $(docker images -q chrome)
+  - name: new image
+    commands:
+      - docker-compose up -d

@@ -1,1 +1,10 @@
-type: pipline
+kind: pipeline
+type: docker
+name: chrome
+
+steps: 
+- name: test
+  image: python
+  commands:
+  - echo hello
+  - echo world

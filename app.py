@@ -132,17 +132,48 @@ def newUser():
 @app.route('/addSite/', methods=['POST'])
 def addSite():
     pra = pramFilter(request.form.to_dict())
-    if not listInclude(["id", "passwd"], pra.keys()):
+    if not listInclude(["id", "passwd", "site", "name", "icon"], pra.keys()):
         return jsonify({
             "status": False,
             "msg": "参数缺失"
         })
-    return jsonify(pra)
+    usr = searchDate(Users, id=pra["id"], passwd=pra["passwd"])
+    if not usr:
+        return jsonify({
+            "status": False,
+            "msg": "拒绝恶意操作"
+        })
+    sit = searchDate(Sites, user=pra["id"], site=pra["site"])
+    if sit:
+        return jsonify({
+            "status": False,
+            "msg": "重复添加"
+        })
+    nid = randStr(random.randint(10, 16))
+    ext = searchDate(Sites, id=nid)
+    while ext:
+        nid = randStr(random.randint(10, 16))
+        ext = searchDate(Sites, id=nid)
+    res = {
+        "id": nid,
+        "user": pra["id"],
+        "site": pra["site"],
+        "icon": pra["icon"],
+        "name": pra["name"],
+        "count": 0
+    }
+    addData(Sites, res)
+    return jsonify({
+        "status": True,
+        "msg": "添加成功",
+        "data": res
+    })
 
 
 @app.route('/icon/<path:url>')
 def icon(url):
-    img = requests.get("https://favicon.link/v3/?url=" + url).content
+    # https://favicon.link/
+    img = requests.get("https://favicon.link/" + url).content
     return Response(img, mimetype="image/x-icon")
 
 

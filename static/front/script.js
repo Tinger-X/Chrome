@@ -293,6 +293,7 @@ $(document).ready(function () {
     }
 
     function siteAdd() {
+        maskChange();
         let str = "<div id='formBox'><h2>添加</h2><form id='add-form'>" +
             "<div class='input-box'><input type='text' id='add-url' required><label>网址</label></div>" +
             "<div class='input-box'><input type='text' id='add-name' required><label>名称</label></div>" +
@@ -310,9 +311,11 @@ $(document).ready(function () {
             let jud = isURL(url.val());
             if (jud.judge) {
                 let pra = {
+                    id: DATA.user.id,
+                    passwd: DATA.user.passwd,
                     site: jud.str,
                     name: nam.val(),
-                    icon: "/icon/" + this.site
+                    icon: "/icon/" + jud.str
                 };
                 let can = true;
                 if (!pra.site) {
@@ -327,18 +330,19 @@ $(document).ready(function () {
                     if (pra.site === DATA.site[i].site) {
                         redTip(url);
                         can = false;
-                        alert("网址重复");
+                        alert("网址重复", false);
                     }
                 }
                 if (can) {
                     $.post("/addSite/", pra, function (res) {
-                        console.log(res);
-                        // if (res["status"]) {
-                        //     reloadPage(res);
-                        //     $("#login-account, #login-passwd").val("");
-                        //     $("#formBox").remove();
-                        //     maskChange(false);
-                        // } else alert(res["msg"], res["status"]);
+                        if (res["status"]) {
+                            DATA.site.push(res.data);
+                            localStorage.setItem("Tinger", JSON.stringify(DATA));
+                            reloadPage(DATA);
+                            $("#add-url, #add-name").val("");
+                            $("#formBox").remove();
+                            maskChange(false);
+                        } else alert(res["msg"], res["status"]);
                     });
                 }
             } else {
@@ -348,8 +352,15 @@ $(document).ready(function () {
         });
     }
 
-    function siteModify() {
-
+    function siteModify(num) {
+        maskChange();
+        let the = DATA.site[num];
+        let str = "<div id='formBox'><img src='static/img/icon/close.png' alt='close'><h2>添加</h2><form id='add-form'>" +
+            "<div class='input-box'><input type='text' id='add-url' required><label>网址</label></div>" +
+            "<div class='input-box'><input type='text' id='add-name' required><label>名称</label></div>" +
+            "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>添加</span></div></div>" +
+            "</form></div>";
+        $("#mask").append($(str));
     }
 
     function reloadPage(data) {
@@ -523,7 +534,7 @@ $(document).ready(function () {
             }).next().css({backgroundColor: "transparent"});
         }).click(function () {
             let ind = $(this).parent().attr("ind");
-            if (isLogged()) alert("You're about to modify site[" + ind + "]");
+            if (isLogged()) siteModify(ind);
             else alert("Please login first!", false);
         });
         // add hover and click:
@@ -532,13 +543,8 @@ $(document).ready(function () {
         }, function () {
             $(this).css({backgroundColor: "transparent"});
         }).click(function () {
-            if (isLogged()) {
-                alert("You're about to add a site!");
-                siteAdd();
-            } else {
-                alert("Please login first!", false);
-                siteModify();
-            }
+            if (isLogged()) siteAdd();
+            else alert("Please login first!", false);
         });
     }
 

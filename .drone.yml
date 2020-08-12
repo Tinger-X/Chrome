@@ -3,8 +3,8 @@ type: docker
 name: chrome
 
 steps:
-  - name: remove
-    image: python:3.8
+  - name: republish
+    image: plugins/docker
     commands:
       - docker stop $(docker ps -qf name=Chrome)
       - docker rm $(docker ps -qf name=Chrome)

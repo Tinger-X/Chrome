@@ -21,8 +21,8 @@ class Users(Base):
     nick = Column(String(64))
     account = Column(String(64))
     passwd = Column(String(64))
-    header = Column(String(128), default="static/img/header/{0}.jpg".format(random.randint(0, 9)))
-    wallPaper = Column(String(128), default="static/img/wall/paper{0}.png".format(random.randint(0, 9)))
+    header = Column(String(1024), default="static/img/header/{0}.jpg".format(random.randint(0, 9)))
+    wallPaper = Column(String(1024), default="static/img/wall/paper{0}.png".format(random.randint(0, 9)))
     engine = Column(String(32), default="Google, Baidu, Bing, 360, Sogou")
     time = Column(String(64), default=nowTime())
     wallType = Column(Boolean, default=True)  # True for paper, False for color
@@ -50,9 +50,9 @@ class Sites(Base):
     __tablename__ = "sites"
     id = Column(String(16), primary_key=True)
     user = Column(String(16))
-    site = Column(String(128))
+    site = Column(String(1024))
     name = Column(String(32))
-    icon = Column(String(128), default="static/img/sites/icon{0}.png".format(random.randint(0, 9)))
+    icon = Column(String(1024), default="static/img/sites/icon{0}.png".format(random.randint(0, 9)))
     count = Column(Integer, default=0)
 
     def __str__(self):

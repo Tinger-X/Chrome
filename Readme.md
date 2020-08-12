@@ -6,10 +6,9 @@
 > 注: 本项目暂未设立密码找回机制，请妥善保管密码，如若忘记账户/密码，请注册新账户  
 
 + ##持续CI/CD实现
-> [drone官方文档](https://docs.drone.io/server/provider/github/)  
+> [drone官方文档](https://docs.drone.io/)  
 > [github OAuth application](https://github.com/settings/applications/new)  
 > [docker配置](https://www.runoob.com/docker/docker-compose.html)  
-> [.drone.yml书写规范]()  
 
 + ##Undeveloped
 > 快捷方式修改  

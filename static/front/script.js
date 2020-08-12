@@ -124,8 +124,8 @@ $(document).ready(function () {
         maskChange();
         let str = "<div id='formBox'><h2>登录</h2><div class='form-selector'><p id='to-login' class='form-this'>登录</p>" +
             "<p id='to-sin'>注册</p></div><form id='login-form'>" +
-            "<div class='input-box'><input type='text' id='login-account' required><label>账号</label></div>" +
-            "<div class='input-box'><input type='password' id='login-passwd' required><label>密码</label></div>" +
+            "<div class='input-box'><input type='text' maxlength='64' id='login-account' required><label>账号</label></div>" +
+            "<div class='input-box'><input type='password' maxlength='64' id='login-passwd' required><label>密码</label></div>" +
             "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>登录</span></div></div>" +
             "</form></div>";
         $("#mask").append($(str));
@@ -137,8 +137,8 @@ $(document).ready(function () {
                 $("#sin-form").remove();
 
                 let form = "<form id='login-form'>" +
-                    "<div class='input-box'><input type='text' id='login-account' required><label>账号</label></div>" +
-                    "<div class='input-box'><input type='password' id='login-passwd' required><label>密码</label></div>" +
+                    "<div class='input-box'><input type='text' maxlength='64' id='login-account' required><label>账号</label></div>" +
+                    "<div class='input-box'><input type='password' maxlength='64' id='login-passwd' required><label>密码</label></div>" +
                     "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>登录</span></div></div>" +
                     "</form>";
                 $("#formBox>h2").html("登录");
@@ -154,10 +154,10 @@ $(document).ready(function () {
                 $("#login-form").remove();
 
                 let form = "<form id='sin-form'>" +
-                    "<div class='input-box'><input type='text' id='sin-account' required><label>账号</label></div>" +
-                    "<div class='input-box'><input type='text' id='sin-nick' required><label>昵称</label></div>" +
-                    "<div class='input-box'><input type='password' id='sin-passwd' required><label>密码</label></div>" +
-                    "<div class='input-box'><input type='password' id='sin-repeat' required><label>确认密码</label></div>" +
+                    "<div class='input-box'><input type='text' maxlength='64' id='sin-account' required><label>账号</label></div>" +
+                    "<div class='input-box'><input type='text' maxlength='64' id='sin-nick' required><label>昵称</label></div>" +
+                    "<div class='input-box'><input type='password' maxlength='64' id='sin-passwd' required><label>密码</label></div>" +
+                    "<div class='input-box'><input type='password' maxlength='64' id='sin-repeat' required><label>确认密码</label></div>" +
                     "<div id='sin-verify'></div>" +
                     "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>注册</span></div></div>" +
                     "</form>";
@@ -295,8 +295,8 @@ $(document).ready(function () {
     function siteAdd() {
         maskChange();
         let str = "<div id='formBox'><h2>添加</h2><form id='add-form'>" +
-            "<div class='input-box'><input type='text' id='add-url' required><label>网址</label></div>" +
-            "<div class='input-box'><input type='text' id='add-name' required><label>名称</label></div>" +
+            "<div class='input-box'><input type='text' maxlength='1010' id='add-url' required><label>网址</label></div>" +
+            "<div class='input-box'><input type='text' maxlength='32' id='add-name' required><label>名称</label></div>" +
             "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>添加</span></div></div>" +
             "</form></div>";
         $("#mask").append($(str));
@@ -318,10 +318,6 @@ $(document).ready(function () {
                     icon: "/icon/" + jud.str
                 };
                 let can = true;
-                if (!pra.site) {
-                    redTip(url);
-                    can = false;
-                }
                 if (!pra.name) {
                     redTip(nam);
                     can = false;
@@ -355,12 +351,24 @@ $(document).ready(function () {
     function siteModify(num) {
         maskChange();
         let the = DATA.site[num];
-        let str = "<div id='formBox'><img src='static/img/icon/close.png' alt='close'><h2>添加</h2><form id='add-form'>" +
-            "<div class='input-box'><input type='text' id='add-url' required><label>网址</label></div>" +
-            "<div class='input-box'><input type='text' id='add-name' required><label>名称</label></div>" +
-            "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>添加</span></div></div>" +
+        let str = "<div id='formBox'><img src='static/img/icon/close.png' alt='close'><h2>添加</h2><form id='mod-form'>" +
+            "<div class='input-box'><input type='text' value='" + the.site + "' maxlength='1010' id='mod-url' required><label>网址</label></div>" +
+            "<div class='input-box'><input type='text' value='" + the.name + "' maxlength='32' id='mod-name' required><label>名称</label></div>" +
+            "<div class='input-box'><input type='text' value='" + the.icon + "' maxlength='1024' id='mod-icon' required><label>icon</label></div>" +
+            "<div class='btn-box'><div class='false'>删除</div><div class='true'><span>修改</span></div></div>" +
             "</form></div>";
         $("#mask").append($(str));
+        $("#formBox>img").click(function () {
+            $("#mod-url, #mod-name, #mod-icon").val("");
+            $("#formBox").remove();
+            maskChange(false);
+        });
+        $("#mod-form div.false").click(function () {
+            alert("you're about to delete the link!!", false);
+        });
+        $("#mod-form div.true").click(function () {
+            alert("you're about to modify the link!!", false);
+        });
     }
 
     function reloadPage(data) {
@@ -434,7 +442,7 @@ $(document).ready(function () {
         }
 
         // input and search:
-        $(document).keyup((even) => {
+        $(document).keydown((even) => {
             if (even.which === 13) {
                 let content = $("#input").val();
                 if (content) {
@@ -446,6 +454,8 @@ $(document).ready(function () {
                         window.location = eng + content;
                     }
                 }
+            } else {
+                $("#input").focus();
             }
         });
     }

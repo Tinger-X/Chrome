@@ -5,6 +5,10 @@ name: chrome
 steps:
   - name: republish
     image: plugins/docker
+    settings:
+      repo: Tinger/Chrome
+      secrets: [docker-user, docker-passwd]
+      tages: latest
     commands:
       - docker stop $(docker ps -qf name=Chrome)
       - docker rm $(docker ps -qf name=Chrome)

@@ -10,6 +10,8 @@ steps:
       secrets: [docker-user, docker-passwd]
       tages: latest
     commands:
+      - pwd
+      - ls
       - docker stop $(docker ps -qf name=Chrome)
       - docker rm $(docker ps -qf name=Chrome)
       - docker rmi $(docker images -q chrome)

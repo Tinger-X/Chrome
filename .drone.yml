@@ -3,7 +3,8 @@ type: docker
 name: chrome
 
 workspace:
-  path: /srv/Dockers/chrome
+  - name: chrome
+    path: /srv/Dockers/chrome
 
 steps:
   - name: republish

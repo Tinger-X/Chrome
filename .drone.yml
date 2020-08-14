@@ -16,6 +16,8 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
+      - pwd
+      - ls
       - docker ps -a
 
 volumes:

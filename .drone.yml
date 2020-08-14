@@ -12,7 +12,4 @@ steps:
     commands:
       - pwd
       - ls
-      - docker stop $(docker ps -qf name=Chrome)
-      - docker rm $(docker ps -qf name=Chrome)
-      - docker rmi $(docker images -q chrome)
       - docker-compose up -d

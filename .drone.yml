@@ -2,6 +2,9 @@ kind: pipeline
 type: docker
 name: chrome
 
+workspace:
+  /srv/Dockers/chrome
+
 steps:
   - name: republish
     image: plugins/docker
@@ -9,9 +12,22 @@ steps:
       repo: Tinger/Chrome
       secrets: [docker-user, docker-passwd]
       tages: latest
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
-      - docker images
-      - docker ps
       - docker ps -a
-      - docker build -t chrome:latest .
-      - docker run -d --name Chrome -p 127.0.0.1:5000:5000 chrome:latest
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+#    commands:
+#      - docker build -t chrome:latest .
+#      - docker run -d --name Chrome -p 127.0.0.1:5000:5000 chrome:latest
+
+trigger:
+  branch:
+    - master
+  event:
+    - push

@@ -1,42 +1,17 @@
 kind: pipeline
-name: Chrome
-workspace:
-  base: /chrome
-  path: .
-
+name: default
 steps:
-  - name: publish
+  - name: docker
     image: plugins/docker
     settings:
-      repo: redreg.redhome.cc/test
-      registry: redreg.redhome.cc
-      username: drone
-      password: dronelogin
-      mirror: https://fhvwls99.mirror.aliyuncs.com
-      debug: true
-      tags:
-        - ${DRONE_COMMIT_SHA:0:8}
-    when:
-      branch:
-        - master
-
-  - name: update-service
-    image: redhome/docker-cli
-    volumes:
-      - name: docker
-        path: /var/run/docker.sock
-    commands:
-      - docker login redreg.redhome.cc --username drone --password dronelogin
-      - docker pull redreg.redhome.cc/test:${DRONE_COMMIT_SHA:0:8}
-      - docker ps -a
-    when:
-      branch:
-        - master
-
-volumes:
-  - name: docker
-    path: /var/run/docker.sock
-
-trigger:
-  branch:
-    - master
+      repo: Tinger/chrome
+      use_cache: true
+      username:
+        from_secret: Tinger
+      password:
+        from_secret: passwd
+    tags:
+      - latest
+when:
+  event: push
+  branch: master

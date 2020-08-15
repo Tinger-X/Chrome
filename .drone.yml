@@ -1,18 +1,37 @@
 kind: pipeline
-type: docker
-name: chrome
+name: Chrome
+workspace:
+  base: /chrome
+  path: .
 
 steps:
-  - name: republish
+  - name: publish
     image: plugins/docker
+    settings:
+      repo: redreg.redhome.cc/test
+      registry: redreg.redhome.cc
+      username: drone
+      password: dronelogin
+      mirror: https://fhvwls99.mirror.aliyuncs.com
+      debug: true
+      tags:
+        - ${DRONE_COMMIT_SHA:0:8}
+    when:
+      branch:
+        - master
+
+  - name: update-service
+    image: redhome/docker-cli
     volumes:
       - name: docker
         path: /var/run/docker.sock
     commands:
+      - docker login redreg.redhome.cc --username drone --password dronelogin
+      - docker pull redreg.redhome.cc/test:${DRONE_COMMIT_SHA:0:8}
       - docker ps -a
-      - docker build -t chrome:latest .
-      - docker run -d --name Chrome -p 127.0.0.1:5000:5000 chrome:latest
-
+    when:
+      branch:
+        - master
 
 volumes:
   - name: docker
@@ -22,5 +41,3 @@ volumes:
 trigger:
   branch:
     - master
-  event:
-    - push

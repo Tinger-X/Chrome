@@ -74,8 +74,8 @@ def databasesInit():
         "nick": "Chrome",
         "account": "public-chrome",
         "passwd": "TingerChromeSite",
-        "header": "static/img/header/3.jpg".format(random.randint(0, 9)),
-        "wallPaper": "static/img/wall/paper{0}.png".format(random.randint(0, 9))
+        "header": "/static/img/icon/user.png",
+        "wallPaper": "/static/img/wall/paper{0}.png".format(random.randint(0, 9))
     }
     Tinger = {
         "id": "TingerMadeThisId",
@@ -95,44 +95,44 @@ def databasesInit():
         {
             "id": randStr(16),
             "user": "TingerChromeSite",
-            "site": "https://homenew.console.aliyun.com/",
-            "icon": "https://www.aliyun.com/favicon.ico",
+            "site": "https://account.aliyun.com/login/login.html",
+            "icon": "/icon/https://account.aliyun.com/login/login.html",
             "name": "阿里云"
         }, {
             "id": randStr(16),
             "user": "TingerChromeSite",
             "site": "https://www.iconfont.cn/",
-            "icon": "https://img.alicdn.com/tps/i4/TB1_oz6GVXXXXaFXpXXJDFnIXXX-64-64.ico",
+            "icon": "/icon/https://www.iconfont.cn/",
             "name": "IconFont"
         }, {
             "id": randStr(16),
             "user": "TingerChromeSite",
             "site": "https://www.processon.com/diagrams/",
-            "icon": "https://www.processon.com/favicon.ico",
+            "icon": "/icon/https://www.processon.com/diagrams/",
             "name": "ProcessOn"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "http://hdu.fanya.chaoxing.com/portal",
-            "icon": "http://hdu.fanya.chaoxing.com/favicon.ico",
+            "icon": "/icon/http://hdu.fanya.chaoxing.com/portal",
             "name": "杭电泛雅"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
-            "site": "https://homenew.console.aliyun.com/",
-            "icon": "https://www.aliyun.com/favicon.ico",
+            "site": "https://account.aliyun.com/login/login.html",
+            "icon": "/icon/https://account.aliyun.com/login/login.html",
             "name": "阿里云"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "https://www.iconfont.cn/",
-            "icon": "https://img.alicdn.com/tps/i4/TB1_oz6GVXXXXaFXpXXJDFnIXXX-64-64.ico",
+            "icon": "/icon/https://www.iconfont.cn/",
             "name": "IconFont"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "https://www.processon.com/diagrams/",
-            "icon": "https://www.processon.com/favicon.ico",
+            "icon": "/icon/https://www.processon.com/diagrams/",
             "name": "ProcessOn"
         }
     ]

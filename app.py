@@ -29,7 +29,12 @@ def login():
     if not usr:
         return jsonify({
             "status": False,
-            "msg": "用户名或密码错误"
+            "msg": "账户未注册"
+        })
+    if usr[0]["passwd"] != pra["passwd"]:  # mysql不区分大小写，需要手动区分
+        return jsonify({
+            "status": False,
+            "msg": "密码错误"
         })
     return jsonify({
         "status": True,
@@ -174,7 +179,7 @@ def addSite():
 def icon(url):
     # https://favicon.link/
     img = requests.get("https://favicon.link/" + url).content
-    return Response(img, mimetype="image/x-icon")
+    return Response(img, mimetype="image/x-png")
 
 
 if __name__ == '__main__':

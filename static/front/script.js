@@ -98,17 +98,19 @@ $(document).ready(function () {
         old[num] = show;
         let txt = "在" + old[0] + "上搜索，或输入网址。[回车结束]";
         $("#input").attr("placeholder", txt);
-        if (isLogged() && num) updateUser({engine: old.join(", ")});
+        if (num) updateUser({engine: old.join(", ")});
     }
 
     function updateUser(attrs) {
         for (let key in attrs) DATA.user[key] = attrs[key];
         localStorage.setItem("Tinger", JSON.stringify(DATA));
-        attrs.id = DATA.user.id;
-        attrs.passwd = DATA.user.passwd;
-        $.post("/updateUser/", attrs, (res) => {
-            console.log(res);
-        });
+        if (isLogged()) {
+            attrs.id = DATA.user.id;
+            attrs.passwd = DATA.user.passwd;
+            $.post("/updateUser/", attrs, (res) => {
+                console.log(res);
+            });
+        }
     }
 
     function updateSite(attrs) {
@@ -287,7 +289,6 @@ $(document).ready(function () {
 
     function userLogout() {
         $.post("/login/", {account: "public-chrome", passwd: ""}, function (res) {
-            alert(res["msg"], res["status"]);
             reloadPage(res);
         });
     }
@@ -424,7 +425,7 @@ $(document).ready(function () {
         let selected = document.getElementById("select");
         let ls = document.getElementById("content").getElementsByTagName("img");
         for (let i = 0; i < 4; i++) {
-            ls[i].order = i + 1;
+            ls[i]["order"] = i + 1;
             ls[i].onclick = function () {
                 let cho = {
                     src: this.src,
@@ -437,7 +438,7 @@ $(document).ready(function () {
                 selected.src = cho.src;
                 selected.alt = cho.alt;
                 selected.title = cho.title;
-                engineChange(this.order);
+                engineChange(this["order"]);
             }
         }
 
@@ -454,7 +455,7 @@ $(document).ready(function () {
                         window.location = eng + content;
                     }
                 }
-            } else {
+            } else if ($("#mask").is(":empty")) {
                 $("#input").focus();
             }
         });
@@ -471,6 +472,7 @@ $(document).ready(function () {
         $("#avatar").attr("src", data.user.header);  // header
         $("#nick").html(data.user.nick).css("color", data.user.wordColor);  // nick
         if (data.user.wallType) $("#body").css({  // background
+            "backgroundColor": "transparent",
             "backgroundImage": "url(" + data.user.wallPaper + ")",
             "backdropFilter": "blur(" + data.user.wallFilter + "px)"
         });
@@ -515,7 +517,7 @@ $(document).ready(function () {
                         + "</div>";
                     line.append($(str));
                 } else {
-                    let add = "<div class='nav'><add><img src='static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>";
+                    let add = "<div class='nav'><add><img src='/static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>";
                     line.append($(add));
                     break;
                 }

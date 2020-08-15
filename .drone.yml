@@ -12,6 +12,9 @@ steps:
       - docker ps -a
       - docker build -t chrome:latest .
       - docker run -d --name Chrome -p 127.0.0.1:5000:5000 chrome:latest
+    when:
+      branch:
+        - master
 
 volumes:
   - name: docker

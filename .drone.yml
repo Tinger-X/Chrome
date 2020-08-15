@@ -9,11 +9,14 @@ steps:
       - name: docker
         path: /var/run/docker.sock
     commands:
-      - pwd
-      - ls
       - docker ps -a
       - docker build -t chrome:latest .
       - docker run -d --name Chrome -p 127.0.0.1:5000:5000 chrome:latest
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
 
 trigger:
   branch:

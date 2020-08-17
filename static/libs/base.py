@@ -1,5 +1,8 @@
 import random
+import requests
 from datetime import datetime
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup as BS
 
 
 def randStr(num, _map_=None):
@@ -45,3 +48,36 @@ def pramFilter(pram):
         if key in _all_:
             res[key] = pram[key]
     return res
+
+
+def iconGet(url):
+    default = "/static/img/sites/icon{0}.png".format(random.randint(0, 9))
+    try:  # 尝试解码
+        decode = urlparse(url)
+    except:
+        return default
+
+    try:  # 尝试 host + /favicon.ico
+        most = decode[0] + "://" + decode[1] + "/favicon.ico"
+        trp = requests.get(most)
+        if trp.status_code == 200:
+            return most
+        else:
+            try:  # 尝试 HTML head内link
+                link_resp = requests.get(url)
+                text = BS(link_resp.text, 'html.parser')
+                link = text.select('link[rel~=icon]')
+                if len(link):
+                    res = link[0].get('href')
+                    if "//" in res:
+                        return res
+                    if res[0] == "/":
+                        return decode[0] + "://" + decode[1] + res
+                    else:
+                        return decode[0] + "://" + decode[1] + "/" + res
+                else:
+                    return default
+            except:
+                return default
+    except:
+        return default

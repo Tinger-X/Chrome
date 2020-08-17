@@ -1,5 +1,4 @@
 from flask import Flask, render_template, jsonify, request, Response
-import requests
 from static.libs.mysql import *
 
 app = Flask(__name__)
@@ -137,7 +136,7 @@ def newUser():
 @app.route('/addSite/', methods=['POST'])
 def addSite():
     pra = pramFilter(request.form.to_dict())
-    if not listInclude(["id", "passwd", "site", "name", "icon"], pra.keys()):
+    if not listInclude(["id", "passwd", "site", "name"], pra.keys()):
         return jsonify({
             "status": False,
             "msg": "参数缺失"
@@ -163,7 +162,7 @@ def addSite():
         "id": nid,
         "user": pra["id"],
         "site": pra["site"],
-        "icon": pra["icon"],
+        "icon": iconGet(pra["site"]),
         "name": pra["name"],
         "count": 0
     }

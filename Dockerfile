@@ -1,6 +1,10 @@
 FROM python:latest
 WORKDIR /srv/Chrome/
+
+COPY requirements.txt .
+
+RUN /usr/local/bin/python -m pip install -i https://mirrors.aliyun.com/pypi/simple/ --upgrade pip && pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt && pwd && ls
+
 COPY . .
-RUN pip install -i http://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
 
 CMD ["gunicorn", "app:app", "-c", "gunicorn.conf.py"]

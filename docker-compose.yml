@@ -9,5 +9,5 @@ services:
     ports:
       - 127.0.0.1:5000:5000
     volumes:
-      - /srv/Docker/chrome/:/srv/Chrome/
-    command: ["gunicorn", "app:app", "-c", "gunicorn.conf.py"]
+      - /srv/Dockers/chrome/:/srv/Chrome/
+      - /var/run/mysqld/mysqld.sock:/var/run/mysqld/mysqld.sock

@@ -352,7 +352,7 @@ $(document).ready(function () {
     function siteModify(num) {
         maskChange();
         let the = DATA.site[num];
-        let str = "<div id='formBox'><img src='static/img/icon/close.png' alt='close'><h2>添加</h2><form id='mod-form'>" +
+        let str = "<div id='formBox'><img src='/static/img/icon/close.png' alt='close'><h2>添加</h2><form id='mod-form'>" +
             "<div class='input-box'><input type='text' value='" + the.site + "' maxlength='1010' id='mod-url' required><label>网址</label></div>" +
             "<div class='input-box'><input type='text' value='" + the.name + "' maxlength='32' id='mod-name' required><label>名称</label></div>" +
             "<div class='input-box'><input type='text' value='" + the.icon + "' maxlength='1024' id='mod-icon' required><label>icon</label></div>" +
@@ -484,13 +484,13 @@ $(document).ready(function () {
         engineChange();
         let ens = data.user.engine.split(', ');  // engine
         $("#select").attr({
-            src: "static/img/icon/" + ens[0] + ".png",
+            src: "/static/img/icon/" + ens[0] + ".png",
             alt: ens[0],
             title: ens[0]
         });
         $("#content>img").each(function (i) {
             $(this).attr({
-                src: "static/img/icon/" + ens[i + 1] + ".png",
+                src: "/static/img/icon/" + ens[i + 1] + ".png",
                 alt: ens[i + 1],
                 title: ens[i + 1]
             });
@@ -575,7 +575,7 @@ $(document).ready(function () {
         maskChange();
         let the = $("#alert");
         if (the.length !== 1) {
-            the = $("<div id='alert'><p>" + msg + "</p><img src='static/img/icon/close.png' alt='close'></div>");
+            the = $("<div id='alert'><p>" + msg + "</p><img src='/static/img/icon/close.png' alt='close'></div>");
             $("#mask").append(the);
         }
         let self = setTimeout(function () {

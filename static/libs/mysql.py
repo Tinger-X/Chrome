@@ -144,7 +144,6 @@ def databasesInit():
             "name": "ProcessOn"
         }
     ]
-    print(site)
     addData(Sites, site)
 
 
@@ -165,6 +164,14 @@ def modifyData(aim, _id_, **value):
     Session.query(aim).filter(aim.id == _id_).update(value)
     Session.commit()
 
+
+def deleteData(aim, _id_):
+    old = Session.query(aim).filter(aim.id == _id_).first()
+    Session.delete(old)
+    Session.commit()
+
+
 # databasesInit()
 # print(searchDate(Users))
 # modifyData(Users, "TingerMadeThisId", id="TingerMadeThisId", wallFilter=1)
+# deleteData(Sites, _id_="myUAww!c!n")

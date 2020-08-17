@@ -17,10 +17,11 @@ def login():
             "status": False,
             "msg": "参数缺失"
         })
-    if pra["account"] == "public-chrome":
+    if pra["account"] == "public-chrome" and pra["passwd"] == "":
         return jsonify({
             "status": True,
             "msg": "注销成功",
+            "logged": False,
             "user": searchDate(Users, id="TingerChromeSite")[0],
             "site": searchDate(Sites, user="TingerChromeSite")
         })
@@ -38,6 +39,7 @@ def login():
     return jsonify({
         "status": True,
         "msg": "登录成功",
+        "logged": True,
         "user": usr[0],
         "site": searchDate(Sites, user=usr[0]["id"])
     })
@@ -52,7 +54,7 @@ def updateUser():
             "msg": "参数缺失"
         })
     uid = pra["id"]
-    if uid == "TingerChromeSite":
+    if uid == "TingerChromeSite" and pra["passwd"] == "":
         return jsonify({
             "status": False,
             "msg": "越权操作"
@@ -78,10 +80,11 @@ def updateSite():
             "status": False,
             "msg": "参数缺失"
         })
-    if pra["user"] == "TingerChromeSite" and not listInclude(pra.keys(), ["user", "passwd", "id", "count"]):
+    if pra["user"] == "TingerChromeSite" and pra["passwd"] == "":
+        modifyData(Sites, pra["id"], count=pra["count"])
         return jsonify({
-            "status": False,
-            "msg": "越权操作，已禁止。"
+            "status": True,
+            "msg": "更新成功"
         })
     usr = searchDate(Users, id=pra["user"], passwd=pra["passwd"])
     if not usr:
@@ -95,6 +98,27 @@ def updateSite():
     return jsonify({
         "status": True,
         "msg": "更新成功"
+    })
+
+
+@app.route("/deleteSite/", methods=["POST"])
+def deleteSite():
+    pra = pramFilter(request.form.to_dict())
+    if not listInclude(["user", "passwd", "id"], pra.keys()):
+        return jsonify({
+            "status": False,
+            "msg": "参数缺失"
+        })
+    usr = searchDate(Users, id=pra["user"], passwd=pra["passwd"])
+    if not usr:
+        return jsonify({
+            "status": False,
+            "msg": "拒绝恶意操作"
+        })
+    deleteData(Sites, _id_=pra["id"])
+    return jsonify({
+        "status": True,
+        "msg": "删除成功"
     })
 
 
@@ -122,12 +146,13 @@ def newUser():
         "account": pra["account"][:64],
         "nick": pra["nick"][:64],
         "passwd": pra["passwd"][:64],
-        "header": "static/img/header/{0}.jpg".format(random.randint(0, 9)),
-        "wallPaper": "static/img/wall/paper{0}.png".format(random.randint(0, 9))
+        "header": "/static/img/header/{0}.jpg".format(random.randint(0, 9)),
+        "wallPaper": "/static/img/wall/paper{0}.png".format(random.randint(0, 9))
     })
     return jsonify({
         "status": True,
         "msg": "注册并登录成功",
+        "logged": True,
         "user": searchDate(Users, id=nid)[0],
         "site": []
     })
@@ -136,18 +161,18 @@ def newUser():
 @app.route('/addSite/', methods=['POST'])
 def addSite():
     pra = pramFilter(request.form.to_dict())
-    if not listInclude(["id", "passwd", "site", "name"], pra.keys()):
+    if not listInclude(["user", "passwd", "site", "name"], pra.keys()):
         return jsonify({
             "status": False,
             "msg": "参数缺失"
         })
-    usr = searchDate(Users, id=pra["id"], passwd=pra["passwd"])
+    usr = searchDate(Users, id=pra["user"], passwd=pra["passwd"])
     if not usr:
         return jsonify({
             "status": False,
             "msg": "拒绝恶意操作"
         })
-    sit = searchDate(Sites, user=pra["id"], site=pra["site"])
+    sit = searchDate(Sites, user=pra["user"], site=pra["site"])
     if sit:
         return jsonify({
             "status": False,
@@ -160,7 +185,7 @@ def addSite():
         ext = searchDate(Sites, id=nid)
     res = {
         "id": nid,
-        "user": pra["id"],
+        "user": pra["user"],
         "site": pra["site"],
         "icon": iconGet(pra["site"]),
         "name": pra["name"],

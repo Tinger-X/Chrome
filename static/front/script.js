@@ -12,7 +12,10 @@ $(document).ready(function () {
             wallColor: "",
             engine: ""
         },
-        site: []
+        site: [],
+        status: false,
+        msg: "",
+        logged: false
     };
     const engineMap = {
         Google: "https://www.google.com/search?ie=UTF-8&q=",
@@ -34,51 +37,290 @@ $(document).ready(function () {
     function getData() {
         return new Promise((resolve => {
             let judge = JSON.parse(localStorage.getItem("Tinger")) || false;
-            if (judge && judge.user.id !== 'TingerChromeSite') resolve(judge);
+            if (judge && judge.logged) resolve(judge);
             else {
                 $.post("/login/", {account: "public-chrome", passwd: ""}, function (res) {
-                    res.site = res.site.sort((a, b) => {
-                        return b.count - a.count;
-                    });
-                    localStorage.setItem("Tinger", JSON.stringify(res));
-                    resolve(res);
+                    if (res.status) {
+                        res.site = res.site.sort((a, b) => {
+                            return b.count - a.count;
+                        });
+                        localStorage.setItem("Tinger", JSON.stringify(res));
+                        resolve(res);
+                    } else alert(res.msg, false);
                 });
             }
         }));
-        /* TingerChromeSite
-        Tinger: {
-            user: {
-                id: 'xxx', other: '', ...
-            },
-            site: [
-                {},{},{}...
-            ]
-        }
-        */
     }
 
-    function isLogged() {
-        return DATA.user.id !== "TingerChromeSite";
+    function setData(data) {
+        if (DATA.logged) {  // 差别渲染
+            $("#inout").html("注销");
+        } else {
+            $("#inout").html("登录/注册");
+        }
+
+        // 无差别渲染
+        $("#avatar").attr("src", data.user.header);  // header
+        $("#nick").html(data.user.nick).css("color", data.user.wordColor);  // nick
+        if (data.user.wallType) $("#body").css({  // background
+            "backgroundColor": "transparent",
+            "backgroundImage": "url(" + data.user.wallPaper + ")",
+            "backdropFilter": "blur(" + data.user.wallFilter + "px)"
+        });
+        else $("#body").css({
+            "backgroundImage": "none",
+            "backgroundColor": data.user.wallColor,
+            "backdropFilter": "blur(" + data.user.wallFilter + "px)"
+        });
+        engineChange();
+        let ens = data.user.engine.split(', ');  // engine
+        $("#select").attr({
+            src: "/static/img/icon/" + ens[0] + ".png",
+            alt: ens[0],
+            title: ens[0]
+        });
+        $("#content>img").each(function (i) {
+            $(this).attr({
+                src: "/static/img/icon/" + ens[i + 1] + ".png",
+                alt: ens[i + 1],
+                title: ens[i + 1]
+            });
+        });
+        showSites(data.site);
     }
 
-    function isURL(str_url) {
-        let strRegex = "^((https|http)://)?"  // 开头- http(s)://
-            + "(([0-9]{1,3}\\.){3}[0-9]{1,3}" // IP- 199.194.52.184
-            + "|(([0-9A-Za-z-\\._*@\u4e00-\u9fa5]+\\.)*([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\\.[a-z]{2,6}))" // domain- third.second.host
-            + "(:[0-9]{1,6})?" // 端口- :80
-            + "((/?)|(/[^ ]+)+/?)$";  // 路由- 拒绝空格
-        let re = new RegExp(strRegex);
-        if (re.test(str_url)) {
-            let url = str_url.slice(0, 4) === "http" ? str_url : "http://" + str_url;
-            return {
-                judge: true,
-                str: url
-            };
+    function showSites(sites) {
+        let box = $("#box");
+        let len = sites.length;
+        box.html("");
+        let pra = distribute(len);
+        for (let r = 0; r < pra.row; r++) {
+            let line = $("<div class='rows'></div>");
+            for (let c = 0; c < pra.col; c++) {
+                let ind = r * pra.col + c;
+                if (ind < len) {
+                    let str = "<div class='nav' ind=" + ind + ">"
+                        + "<dot title='修改'>···</dot>"
+                        + "<div class='link'>"
+                        + "<img src='" + sites[ind].icon + "' alt='icon'>"
+                        + "<p>" + sites[ind].name + "</p>"
+                        + "</div>"
+                        + "</div>";
+                    line.append($(str));
+                } else if (DATA.logged) {
+                    let add = "<div class='nav'><add><img src='/static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>";
+                    line.append($(add));
+                    break;
+                }
+            }
+            box.append(line);
         }
-        return {
-            judge: false,
-            str: str_url
-        };
+
+        // re-listen: link hover and click:
+        $("div.link").hover(function () {
+            $(this).css({backgroundColor: "rgba(255, 255, 255, 0.2)"}).prev().css({display: "block"});
+        }, function () {
+            $(this).css({backgroundColor: "transparent"}).prev().css({display: "none"});
+        }).click(function () {
+            linkClicked($(this).parent().attr("ind"));
+        });
+        // dot hover and click:
+        $("dot").hover(function () {
+            $(this).css({
+                color: "red",
+                display: "block"
+            }).next().css({backgroundColor: "rgba(255, 255, 255, 0.2)"});
+        }, function () {
+            $(this).css({
+                color: "black",
+                display: "none"
+            }).next().css({backgroundColor: "transparent"});
+        }).click(function () {
+            let ind = $(this).parent().attr("ind");
+            if (DATA.logged) siteModify(ind);
+            else alert("Please login first!", false);
+        });
+        // add hover and click:
+        $("add").hover(function () {
+            $(this).css({backgroundColor: "rgba(255, 255, 255, 0.2)"});
+        }, function () {
+            $(this).css({backgroundColor: "transparent"});
+        }).click(siteAdd);
+    }
+
+    function linkClicked(index) {
+        let the = DATA.site[index];
+        the.count++;
+        updateSite(the);
+        window.location.href = the.site;
+    }
+
+    function updateSite(attrs) {
+        // attrs => a changed site obj
+        for (let i = 0; i < DATA.site.length; i++) {
+            if (DATA.site[i].id === attrs.id) {
+                DATA.site[i] = attrs;
+                break;
+            }
+        }
+        DATA.site = DATA.site.sort((a, b) => {
+            return b.count - a.count;
+        });
+        localStorage.setItem("Tinger", JSON.stringify(DATA));
+
+        showSites(DATA.site);
+        attrs.passwd = DATA.user.passwd;
+        $.post("/updateSite/", attrs, (res) => {
+            if (res.status) console.log(res);
+            else alert(res.msg, false);
+        });
+    }
+
+    function siteModify(num) {
+        maskChange();
+        let the = DATA.site[num];
+        let str = "<div id='formBox'><img src='/static/img/icon/close.png' alt='close'><h2>添加</h2><form id='mod-form'>" +
+            "<div class='input-box'><input type='text' value='" + the.site + "' maxlength='1010' id='mod-url' required><label>网址</label></div>" +
+            "<div class='input-box'><input type='text' value='" + the.name + "' maxlength='32' id='mod-name' required><label>名称</label></div>" +
+            "<div class='input-box'><input type='text' value='" + the.icon + "' maxlength='1024' id='mod-icon' required><label>icon</label></div>" +
+            "<div class='icon-box'><img id='icon-res' src='" + the.icon + "' alt='icon'><div id='icons'></div></div>" +
+            "<div class='btn-box'><div class='false'>删除</div><div class='true'><span>修改</span></div></div>" +
+            "</form></div>";
+        $("#mask").append($(str));
+        // 添加静态icon及点击事件
+        for (let i = 0; i < 10; i++) {
+            let one = "<img src='/static/img/sites/icon" + i + ".png' alt='" + i + "'>";
+            $("#icons").append($(one));
+        }
+        $("#icons>img").click(function () {
+            let src = $(this).attr("src");
+            $("#icon-res").attr("src", src);
+            $("#mod-icon").val(src);
+        });
+        // 输入icon地址结束
+        $("#mod-icon").blur(function () {
+            let src = $(this).val();
+            $("#icon-res").attr("src", src);
+        });
+        // 按钮事件
+        $("#formBox>img").click(function () {
+            $("#mod-url, #mod-name, #mod-icon").val("");
+            $("#formBox").remove();
+            maskChange(false);
+        });
+        $("#mod-form div.false").click(function () {
+            let pra = {
+                user: the.user,
+                passwd: DATA.user.passwd,
+                id: the.id
+            }
+            $.post("/deleteSite/", pra, function (res) {
+                if (res.status) {
+                    let list = [];
+                    for (let i = 0; i < DATA.site.length; i++) if (DATA.site[i].id !== the.id) list.push(DATA.site[i]);
+                    DATA.site = list;
+                    localStorage.setItem("Tinger", JSON.stringify(DATA));
+                    showSites(list);
+                    $("#mod-url, #mod-name, #mod-icon").val("");
+                    $("#formBox").remove();
+                    maskChange(false);
+                } else alert(res.msg, false);
+            });
+        });
+        $("#mod-form div.true").click(function () {
+            let nam = $("#mod-name");
+            let url = $("#mod-url");
+            let ico = $("#mod-icon");
+            let jdg = isURL(url.val());
+            let can = true;
+
+            // update data
+            the.name = nam.val();
+            the.site = jdg.str;
+            the.icon = ico.val();
+            if (!the.name) {
+                redTip(nam);
+                can = false;
+            }
+            if (!jdg.judge) {
+                redTip(url);
+                can = false;
+            }
+            if (!the.icon) {
+                redTip(ico);
+                can = false;
+            }
+            if (can) {
+                updateSite(the);
+                $("#mod-url, #mod-name, #mod-icon").val("");
+                $("#formBox").remove();
+                maskChange(false);
+            }
+        });
+    }
+
+    function siteAdd() {
+        maskChange();
+        let str = "<div id='formBox'><h2>添加</h2><form id='add-form'>" +
+            "<div class='input-box'><input type='text' maxlength='1010' id='add-url' required><label>网址</label></div>" +
+            "<div class='input-box'><input type='text' maxlength='32' id='add-name' required><label>名称</label></div>" +
+            "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>添加</span></div></div>" +
+            "</form></div>";
+        $("#mask").append($(str));
+        $("#add-form div.false").click(function () {
+            $("#add-url, #add-name").val("");
+            $("#formBox").remove();
+            maskChange(false);
+        });
+        $("#add-form div.true").click(function () {
+            let url = $("#add-url");
+            let nam = $("#add-name");
+            let jud = isURL(url.val());
+            if (jud.judge) {
+                let pra = {
+                    user: DATA.user.id,
+                    passwd: DATA.user.passwd,
+                    site: jud.str,
+                    name: nam.val()
+                };
+                let can = true;
+                if (!pra.name) {
+                    redTip(nam);
+                    can = false;
+                }
+                for (let i = 0; i < DATA.site.length; i++) {
+                    if (pra.site === DATA.site[i].site) {
+                        redTip(url);
+                        can = false;
+                        alert("网址重复", false);
+                    }
+                }
+                if (can) {
+                    $.post("/addSite/", pra, function (res) {
+                        if (res.status) {
+                            DATA.site.push(res.data);
+                            localStorage.setItem("Tinger", JSON.stringify(DATA));
+                            reloadPage(DATA);
+                            $("#add-url, #add-name").val("");
+                            $("#formBox").remove();
+                            maskChange(false);
+                        } else alert(res.msg, false);
+                    });
+                }
+            } else {
+                redTip(url);
+                alert("似乎不是一个网址", false);
+            }
+        });
+    }
+
+    function reloadPage(data) {
+        data.site = data.site.sort((a, b) => {
+            return b.count - a.count;
+        });
+        DATA = data;
+        localStorage.setItem("Tinger", JSON.stringify(data));
+        setData(data);
     }
 
     function distribute(num) {
@@ -104,22 +346,14 @@ $(document).ready(function () {
     function updateUser(attrs) {
         for (let key in attrs) DATA.user[key] = attrs[key];
         localStorage.setItem("Tinger", JSON.stringify(DATA));
-        if (isLogged()) {
+        if (DATA.logged) {
             attrs.id = DATA.user.id;
             attrs.passwd = DATA.user.passwd;
             $.post("/updateUser/", attrs, (res) => {
-                console.log(res);
+                if (res.status) console.log(res);
+                else alert(res.msg, false);
             });
         }
-    }
-
-    function updateSite(attrs) {
-        attrs.user = DATA.user.id;
-        attrs.passwd = DATA.user.passwd;
-        localStorage.setItem("Tinger", JSON.stringify(DATA));
-        $.post("/updateSite/", attrs, (res) => {
-            console.log(res);
-        });
     }
 
     function userLogin() {
@@ -195,12 +429,12 @@ $(document).ready(function () {
             }
             if (can) {
                 $.post("/login/", pra, function (res) {
-                    if (res["status"]) {
+                    if (res.status) {
                         reloadPage(res);
                         $("#login-account, #login-passwd").val("");
                         $("#formBox").remove();
                         maskChange(false);
-                    } else alert(res["msg"], res["status"]);
+                    } else alert(res.msg, false);
                 });
             }
         });
@@ -273,12 +507,12 @@ $(document).ready(function () {
 
                         if (can) {
                             $.post("/newUser/", pra, function (res) {
-                                if (res["status"]) {
+                                if (res.status) {
                                     reloadPage(res);
                                     $("#sin-account, #sin-nick, #sin-passwd, #sin-repeat").val("");
                                     $("#formBox").remove();
                                     maskChange(false);
-                                } else alert(res["msg"], res["status"]);
+                                } else alert(res.msg, false);
                             })
                         }
                     });
@@ -289,112 +523,25 @@ $(document).ready(function () {
 
     function userLogout() {
         $.post("/login/", {account: "public-chrome", passwd: ""}, function (res) {
-            reloadPage(res);
+            if (res.status) reloadPage(res);
+            else alert(res.msg, false);
         });
-    }
-
-    function siteAdd() {
-        maskChange();
-        let str = "<div id='formBox'><h2>添加</h2><form id='add-form'>" +
-            "<div class='input-box'><input type='text' maxlength='1010' id='add-url' required><label>网址</label></div>" +
-            "<div class='input-box'><input type='text' maxlength='32' id='add-name' required><label>名称</label></div>" +
-            "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>添加</span></div></div>" +
-            "</form></div>";
-        $("#mask").append($(str));
-        $("#add-form div.false").click(function () {
-            $("#add-url, #add-name").val("");
-            $("#formBox").remove();
-            maskChange(false);
-        });
-        $("#add-form div.true").click(function () {
-            let url = $("#add-url");
-            let nam = $("#add-name");
-            let jud = isURL(url.val());
-            if (jud.judge) {
-                let pra = {
-                    id: DATA.user.id,
-                    passwd: DATA.user.passwd,
-                    site: jud.str,
-                    name: nam.val(),
-                    icon: "/icon/" + jud.str
-                };
-                let can = true;
-                if (!pra.name) {
-                    redTip(nam);
-                    can = false;
-                }
-                for (let i = 0; i < DATA.site.length; i++) {
-                    if (pra.site === DATA.site[i].site) {
-                        redTip(url);
-                        can = false;
-                        alert("网址重复", false);
-                    }
-                }
-                if (can) {
-                    $.post("/addSite/", pra, function (res) {
-                        if (res["status"]) {
-                            DATA.site.push(res.data);
-                            localStorage.setItem("Tinger", JSON.stringify(DATA));
-                            reloadPage(DATA);
-                            $("#add-url, #add-name").val("");
-                            $("#formBox").remove();
-                            maskChange(false);
-                        } else alert(res["msg"], res["status"]);
-                    });
-                }
-            } else {
-                redTip(url);
-                alert("似乎不是一个网址", false);
-            }
-        });
-    }
-
-    function siteModify(num) {
-        maskChange();
-        let the = DATA.site[num];
-        let str = "<div id='formBox'><img src='/static/img/icon/close.png' alt='close'><h2>添加</h2><form id='mod-form'>" +
-            "<div class='input-box'><input type='text' value='" + the.site + "' maxlength='1010' id='mod-url' required><label>网址</label></div>" +
-            "<div class='input-box'><input type='text' value='" + the.name + "' maxlength='32' id='mod-name' required><label>名称</label></div>" +
-            "<div class='input-box'><input type='text' value='" + the.icon + "' maxlength='1024' id='mod-icon' required><label>icon</label></div>" +
-            "<div class='btn-box'><div class='false'>删除</div><div class='true'><span>修改</span></div></div>" +
-            "</form></div>";
-        $("#mask").append($(str));
-        $("#formBox>img").click(function () {
-            $("#mod-url, #mod-name, #mod-icon").val("");
-            $("#formBox").remove();
-            maskChange(false);
-        });
-        $("#mod-form div.false").click(function () {
-            alert("you're about to delete the link!!", false);
-        });
-        $("#mod-form div.true").click(function () {
-            alert("you're about to modify the link!!", false);
-        });
-    }
-
-    function reloadPage(data) {
-        data.site = data.site.sort((a, b) => {
-            return b.count - a.count;
-        });
-        DATA = data;
-        localStorage.setItem("Tinger", JSON.stringify(data));
-        setData(data);
     }
 
     function eventListener() {
         // 差别监听：
         // diy page:
         $("#diy").click(function () {
-            if (isLogged()) {
+            if (DATA.logged) {
                 alert("You're about to DIY your page!");
             } else {
-                alert("You can't DIY this account!", false);
+                alert("Please login first!", false);
             }
         });
 
         // self info:
         $("#update").click(function () {
-            if (isLogged()) {
+            if (DATA.logged) {
                 alert("You're about to change your info!");
             } else {
                 alert("Please login first!", false);
@@ -403,7 +550,7 @@ $(document).ready(function () {
 
         //login / logout:
         $("#inout").click(() => {
-            if (isLogged()) {
+            if (DATA.logged) {
                 userLogout();
             } else {
                 userLogin();
@@ -461,114 +608,24 @@ $(document).ready(function () {
         });
     }
 
-    function setData(data) {
-        if (isLogged()) {  // 差别渲染
-            $("#inout").html("注销");
-        } else {
-            $("#inout").html("登录/注册");
+    function isURL(str_url) {
+        let strRegex = "^((https|http)://)?"  // 开头- http(s)://
+            + "(([0-9]{1,3}\\.){3}[0-9]{1,3}" // IP- 199.194.52.184
+            + "|(([0-9A-Za-z-\\._*@\u4e00-\u9fa5]+\\.)*([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\\.[a-z]{2,6}))" // domain- third.second.host
+            + "(:[0-9]{1,6})?" // 端口- :80
+            + "((/?)|(/[^ ]+)+/?)$";  // 路由- 拒绝空格
+        let re = new RegExp(strRegex);
+        if (re.test(str_url)) {
+            let url = str_url.slice(0, 4) === "http" ? str_url : "http://" + str_url;
+            return {
+                judge: true,
+                str: url
+            };
         }
-
-        // 无差别渲染
-        $("#avatar").attr("src", data.user.header);  // header
-        $("#nick").html(data.user.nick).css("color", data.user.wordColor);  // nick
-        if (data.user.wallType) $("#body").css({  // background
-            "backgroundColor": "transparent",
-            "backgroundImage": "url(" + data.user.wallPaper + ")",
-            "backdropFilter": "blur(" + data.user.wallFilter + "px)"
-        });
-        else $("#body").css({
-            "backgroundImage": "none",
-            "backgroundColor": data.user.wallColor,
-            "backdropFilter": "blur(" + data.user.wallFilter + "px)"
-        });
-        engineChange();
-        let ens = data.user.engine.split(', ');  // engine
-        $("#select").attr({
-            src: "/static/img/icon/" + ens[0] + ".png",
-            alt: ens[0],
-            title: ens[0]
-        });
-        $("#content>img").each(function (i) {
-            $(this).attr({
-                src: "/static/img/icon/" + ens[i + 1] + ".png",
-                alt: ens[i + 1],
-                title: ens[i + 1]
-            });
-        });
-        showSites(data.site);
-    }
-
-    function showSites(sites) {
-        let box = $("#box");
-        let len = sites.length;
-        box.html("");
-        let pra = distribute(len);
-        for (let r = 0; r < pra.row; r++) {
-            let line = $("<div class='rows'></div>");
-            for (let c = 0; c < pra.col; c++) {
-                let ind = r * pra.col + c;
-                if (ind < len) {
-                    let str = "<div class='nav' ind=" + ind + ">"
-                        + "<dot title='修改'>···</dot>"
-                        + "<div class='link'>"
-                        + "<img src='" + sites[ind].icon + "' alt='icon'>"
-                        + "<p>" + sites[ind].name + "</p>"
-                        + "</div>"
-                        + "</div>";
-                    line.append($(str));
-                } else {
-                    let add = "<div class='nav'><add><img src='/static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>";
-                    line.append($(add));
-                    break;
-                }
-            }
-            box.append(line);
-        }
-
-        // re-listen: link hover and click:
-        $("div.link").hover(function () {
-            $(this).css({backgroundColor: "rgba(255, 255, 255, 0.2)"}).prev().css({display: "block"});
-        }, function () {
-            $(this).css({backgroundColor: "transparent"}).prev().css({display: "none"});
-        }).click(function () {
-            linkClicked($(this).parent().attr("ind"));
-        });
-        // dot hover and click:
-        $("dot").hover(function () {
-            $(this).css({
-                color: "red",
-                display: "block"
-            }).next().css({backgroundColor: "rgba(255, 255, 255, 0.2)"});
-        }, function () {
-            $(this).css({
-                color: "black",
-                display: "none"
-            }).next().css({backgroundColor: "transparent"});
-        }).click(function () {
-            let ind = $(this).parent().attr("ind");
-            if (isLogged()) siteModify(ind);
-            else alert("Please login first!", false);
-        });
-        // add hover and click:
-        $("add").hover(function () {
-            $(this).css({backgroundColor: "rgba(255, 255, 255, 0.2)"});
-        }, function () {
-            $(this).css({backgroundColor: "transparent"});
-        }).click(function () {
-            if (isLogged()) siteAdd();
-            else alert("Please login first!", false);
-        });
-    }
-
-    function linkClicked(index) {
-        DATA.site[index].count++;
-        let the = DATA.site[index];
-        DATA.site = DATA.site.sort((a, b) => {
-            return b.count - a.count;
-        });
-        updateSite({id: the.id, count: the.count});
-        showSites(DATA.site);
-        window.location.href = the.site;
+        return {
+            judge: false,
+            str: str_url
+        };
     }
 
     function alert(msg, type = true) {

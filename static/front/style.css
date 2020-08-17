@@ -296,7 +296,6 @@ div.link > p, .nav > add > p {
     height: 2em;
     border-radius: 50%;
     box-sizing: border-box;
-    padding: 2px;
 }
 
 #alert > img:hover {
@@ -305,6 +304,7 @@ div.link > p, .nav > add > p {
 
 #formBox {
     width: 400px;
+    min-width: 400px;
     padding: 40px;
     background: rgb(255, 255, 255);
     box-sizing: border-box;
@@ -323,7 +323,6 @@ div.link > p, .nav > add > p {
     height: 2em;
     border-radius: 50%;
     box-sizing: border-box;
-    padding: 1px;
     position: absolute;
     background-color: red;
     right: 10px;
@@ -609,4 +608,35 @@ p.form-this {
 
 .icon-right:before {
     content: "\e6a3";
+}
+
+.icon-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-box > img {
+    margin: -10px 0 10px;
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #000000;
+    border-radius: 50px;
+}
+
+#icons {
+    width: 225px;
+}
+
+#icons > img {
+    cursor: pointer;
+    border: 1px dashed gray;
+    width: 41px;
+    height: 41px;
+    padding: 6px;
+    margin: 2px;
+    box-sizing: border-box;
 }

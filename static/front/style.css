@@ -345,6 +345,7 @@ div.form-selector > p {
     margin: 0;
     text-align: center;
     line-height: 1.5em;
+    cursor: pointer;
 }
 
 p.form-this {
@@ -639,4 +640,231 @@ p.form-this {
     padding: 6px;
     margin: 2px;
     box-sizing: border-box;
+}
+
+#colorBox {
+    width: 350px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 20px 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    z-index: 99;
+}
+
+cline {
+    width: 90%;
+    height: 35px;
+    border: 1px dashed gray;
+    border-radius: 2px;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+cres {
+    width: 95%;
+    height: 40px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0 0;
+}
+
+input[type='range'] {
+    -webkit-appearance: none;
+    width: 85%;
+    cursor: pointer;
+}
+
+input[type='range']:focus {
+    outline: none;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+    height: 2px;
+    border-radius: 5px;
+    background-color: gray;
+}
+
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 12px;
+    width: 12px;
+    margin-top: -4.5px;
+    border: 4px solid skyblue;
+    border-radius: 50px;
+    background: #FFFFFF;
+}
+
+cval {
+    width: 10%;
+    text-align: center;
+}
+
+#cr::-webkit-slider-runnable-track {
+    background-color: red;
+}
+
+#cr::-webkit-slider-thumb {
+    border: 4px solid red;
+}
+
+#cr ~ cval {
+    color: red;
+}
+
+#cg::-webkit-slider-runnable-track {
+    background-color: green;
+}
+
+#cg::-webkit-slider-thumb {
+    border: 4px solid green;
+}
+
+#cg ~ cval {
+    color: green;
+}
+
+#cb::-webkit-slider-runnable-track {
+    background-color: black;
+}
+
+#cb::-webkit-slider-thumb {
+    border: 4px solid black;
+}
+
+div#colorBox div.true, div#colorBox div.false {
+    width: 70px !important;
+    line-height: 35px !important;
+}
+
+div#colorBox div.true span:after {
+    right: -15px !important;
+    width: 8px !important;
+    height: 8px !important;
+}
+
+div#colorBox div.true:hover span:after,
+div#colorBox div.true:active span:after {
+    right: 5px !important;
+}
+
+#diyBox, #userForm {
+    width: 400px;
+    box-sizing: border-box;
+    padding: 20px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.filter-line {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filter-line > input[type='range'] {
+    width: 70%;
+}
+
+.colorInputBox {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.colorInputBox > .input-box {
+    width: 70%;
+}
+
+#diyBox input {
+    margin: 0;
+}
+
+#wc-res, #bc-res {
+    width: 20%;
+    height: 40px;
+    border-radius: 4px;
+    border: 1px dashed gray;
+    cursor: pointer;
+}
+
+#backBox {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#backBox > .input-box {
+    width: 90%;
+    margin: 5px 0;
+}
+
+#img-res {
+    width: 80px;
+    height: 50px;
+    margin: 5px 0;
+}
+
+#backImgBox {
+    width: 300px;
+}
+
+#backImgBox > img {
+    width: 56px;
+    height: 35px;
+    margin: 2px;
+    box-sizing: border-box;
+    padding: 2px;
+    border: 1px dashed gray;
+    cursor: pointer;
+}
+
+#userForm > .input-box {
+    width: 90%;
+    margin: 10px 0;
+}
+
+#userForm input {
+    margin: 0;
+}
+
+#h-res {
+    width: 60px;
+    height: 60px;
+    border-radius: 50px;
+    box-sizing: border-box;
+    border: 2px solid #000000;
+}
+
+#h-box {
+    width: 300px;
+}
+
+#h-box img {
+    width: 54px;
+    height: 54px;
+    box-sizing: border-box;
+    border: 1px dashed gray;
+    margin: 3px;
+    padding: 2px;
+    cursor: pointer;
 }

@@ -29,7 +29,7 @@ def login():
     if not usr:
         return jsonify({
             "status": False,
-            "msg": "账户未注册"
+            "msg": "用户名或密码错误"
         })
     if usr[0]["passwd"] != pra["passwd"]:  # mysql不区分大小写，需要手动区分
         return jsonify({
@@ -53,8 +53,7 @@ def updateUser():
             "status": False,
             "msg": "参数缺失"
         })
-    uid = pra["id"]
-    if uid == "TingerChromeSite" and pra["passwd"] == "":
+    if pra["id"] == "TingerChromeSite" and pra["passwd"] == "":
         return jsonify({
             "status": False,
             "msg": "越权操作"
@@ -65,7 +64,9 @@ def updateUser():
             "status": False,
             "msg": "拒绝恶意操作"
         })
-    modifyData(Users, uid, **pra)
+    if "wallType" in pra.keys():
+        pra["wallType"] = pra["wallType"] in [True, "true"]
+    modifyData(Users, pra["id"], **pra)
     return jsonify({
         "status": True,
         "msg": "更新成功"

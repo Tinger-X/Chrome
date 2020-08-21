@@ -30,7 +30,7 @@ $(document).ready(function () {
     async function main() {
         DATA = await getData();
         console.log(DATA);
-        setData(DATA);
+        setData();
         eventListener();
     }
 
@@ -52,7 +52,7 @@ $(document).ready(function () {
         }));
     }
 
-    function setData(data) {
+    function setData() {
         if (DATA.logged) {  // 差别渲染
             $("#inout").html("注销");
         } else {
@@ -60,20 +60,20 @@ $(document).ready(function () {
         }
 
         // 无差别渲染
-        $("#avatar").attr("src", data.user.header);  // header
-        $("#nick").html(data.user.nick).css("color", data.user.wordColor);  // nick
-        if (data.user.wallType) $("#body").css({  // background
-            "backgroundColor": "transparent",
-            "backgroundImage": "url(" + data.user.wallPaper + ")",
-            "backdropFilter": "blur(" + data.user.wallFilter + "px)"
+        $("#avatar").attr("src", DATA.user.header);  // header
+        $("#nick").html(DATA.user.nick).css("color", DATA.user.wordColor);  // nick
+        if (DATA.user.wallType) $("#body").css({  // background
+            "backgroundColor": "none",
+            "backgroundImage": "url(" + DATA.user.wallPaper + ")",
+            "backdropFilter": "blur(" + DATA.user.wallFilter + "px)"
         });
         else $("#body").css({
             "backgroundImage": "none",
-            "backgroundColor": data.user.wallColor,
-            "backdropFilter": "blur(" + data.user.wallFilter + "px)"
+            "backgroundColor": DATA.user.wallColor,
+            "backdropFilter": "blur(" + DATA.user.wallFilter + "px)"
         });
         engineChange();
-        let ens = data.user.engine.split(', ');  // engine
+        let ens = DATA.user.engine.split(', ');  // engine
         $("#select").attr({
             src: "/static/img/icon/" + ens[0] + ".png",
             alt: ens[0],
@@ -86,7 +86,7 @@ $(document).ready(function () {
                 title: ens[i + 1]
             });
         });
-        showSites(data.site);
+        showSites(DATA.site);
     }
 
     function showSites(sites) {
@@ -318,9 +318,9 @@ $(document).ready(function () {
         data.site = data.site.sort((a, b) => {
             return b.count - a.count;
         });
-        DATA = data;
         localStorage.setItem("Tinger", JSON.stringify(data));
-        setData(data);
+        DATA = JSON.parse(localStorage.getItem("Tinger"));
+        setData();
     }
 
     function distribute(num) {
@@ -350,7 +350,7 @@ $(document).ready(function () {
             attrs.id = DATA.user.id;
             attrs.passwd = DATA.user.passwd;
             $.post("/updateUser/", attrs, (res) => {
-                if (res.status) console.log(res);
+                if (res.status) reloadPage(DATA);
                 else alert(res.msg, false);
             });
         }
@@ -360,8 +360,8 @@ $(document).ready(function () {
         maskChange();
         let str = "<div id='formBox'><h2>登录</h2><div class='form-selector'><p id='to-login' class='form-this'>登录</p>" +
             "<p id='to-sin'>注册</p></div><form id='login-form'>" +
-            "<div class='input-box'><input type='text' maxlength='64' id='login-account' required><label>账号</label></div>" +
-            "<div class='input-box'><input type='password' maxlength='64' id='login-passwd' required><label>密码</label></div>" +
+            "<div class='input-box'><input type='text' maxlength='32' id='login-account' required><label>账号</label></div>" +
+            "<div class='input-box'><input type='password' maxlength='32' id='login-passwd' required><label>密码</label></div>" +
             "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>登录</span></div></div>" +
             "</form></div>";
         $("#mask").append($(str));
@@ -371,10 +371,9 @@ $(document).ready(function () {
             if (!the.hasClass("form-this")) {
                 $("#to-sin").removeClass("form-this");
                 $("#sin-form").remove();
-
                 let form = "<form id='login-form'>" +
-                    "<div class='input-box'><input type='text' maxlength='64' id='login-account' required><label>账号</label></div>" +
-                    "<div class='input-box'><input type='password' maxlength='64' id='login-passwd' required><label>密码</label></div>" +
+                    "<div class='input-box'><input type='text' maxlength='32' id='login-account' required><label>账号</label></div>" +
+                    "<div class='input-box'><input type='password' maxlength='32' id='login-passwd' required><label>密码</label></div>" +
                     "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>登录</span></div></div>" +
                     "</form>";
                 $("#formBox>h2").html("登录");
@@ -528,24 +527,207 @@ $(document).ready(function () {
         });
     }
 
+    function pageDiy() {
+        maskChange();
+        let str = "<div id='diyBox'><h2>页面自定义</h2><div class='filter-line'>" +
+            "<txt>模糊度</txt><input id='blur' type='range' value='" + DATA.user.wallFilter + "' min='0' max='3' step='1'>" +
+            "<txt>" + DATA.user.wallFilter + "</txt></div><div class='colorInputBox'>" +
+            "<div class='input-box'><input id='w-color' type='text' value='" + DATA.user.wordColor + "' maxlength='128' required><label>字体颜色</label></div>" +
+            "<div id='wc-res'></div></div><div class='form-selector'><p id='b-img'>背景图</p><p id='b-color'>背景色</p></div><div id='backBox'></div>" +
+            "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>修改</span></div></div></div>";
+        $("#mask").append($(str));
+
+        $("#wc-res").css({backgroundColor: DATA.user.wordColor}).click(function () {
+            colorSelect(function (res) {
+                res = colorTrans(res);
+                $("#w-color").val(res);
+                $("#wc-res").css({backgroundColor: res});
+            });
+        });
+        $("#w-color").blur(function () {
+            let c = $(this).val();
+            $("#wc-res").css({backgroundColor: c});
+        });
+        $("#blur").change(function () {
+            let v = $(this).val();
+            $(this).next("txt").html(v);
+        });
+        $("#b-img").click(function () {
+            if (!$(this).hasClass("form-this")) atBackImg();
+        });
+        $("#b-color").click(function () {
+            if (!$(this).hasClass("form-this")) atBackColor();
+        });
+        if (DATA.user.wallType) atBackImg();
+        else atBackColor();
+
+        $("#diyBox div.false").click(function () {
+            $("#diyBox").remove();
+            maskChange(false);
+        });
+        $("#diyBox div.true").click(function () {
+            let pra = {
+                wallFilter: $("#blur").val(),
+                wordColor: $("#w-color").val(),
+                wallType: $("#b-img").hasClass("form-this"),
+            };
+            if (pra.wallType) pra.wallPaper = $("#img-url").val();
+            else pra.wallColor = $("#backColor").val();
+            updateUser(pra);
+            $("#diyBox").remove();
+            maskChange(false);
+        });
+    }
+
+    function atBackImg() {
+        $("#b-color").removeClass("form-this");
+        $("#b-img").addClass("form-this");
+        let str = "<div class='input-box'><input id='img-url' type='text' value='" + DATA.user.wallPaper + "' required><label>URL</label></div>" +
+            "<img id='img-res' src='" + DATA.user.wallPaper + "' alt='wallpaper'><div id='backImgBox'></div>";
+        $("#backBox").empty().append($(str));
+
+        // 添加static图像
+        for (let i = 0; i < 10; i++) {
+            let one = "<img src='/static/img/wall/paper" + i + ".png' alt='" + i + "'>";
+            $("#backImgBox").append($(one));
+        }
+        $("#img-url").blur(function () {
+            let u = $(this).val();
+            $("#img-res").attr({src: u});
+        });
+        $("#backImgBox>img").click(function () {
+            let u = "/static/img/wall/paper" + $(this).attr("alt") + ".png";
+            $("#img-url").val(u);
+            $("#img-res").attr({src: u});
+        });
+    }
+
+    function atBackColor() {
+        $("#b-img").removeClass("form-this");
+        $("#b-color").addClass("form-this");
+        let str = "<div class='colorInputBox'><div class='input-box'><input id='backColor' type='text' maxlength='128' value='" + DATA.user.wallColor + "' required>" +
+            "<label>背景色</label></div><div id='bc-res'></div></div>";
+        $("#backBox").empty().append($(str));
+
+        $("#backColor").blur(function () {
+            let c = $(this).val();
+            $("#bc-res").css({backgroundColor: c});
+        });
+        $("#bc-res").css({backgroundColor: DATA.user.wallColor}).click(function () {
+            colorSelect(function (res) {
+                res = colorTrans(res);
+                $("#backColor").val(res);
+                $("#bc-res").css({backgroundColor: res});
+            });
+        });
+    }
+
+    function colorTrans(obj = {r: 0, g: 0, b: 0, a: 1}) {
+        return "rgba(" + obj.r + ", " + obj.g + ", " + obj.b + ", " + obj.a + ")";
+    }
+
+    function colorSelect(callback, color = {r: 100, g: 100, b: 100, a: 1}) {
+        maskChange();
+
+        function colorFix(obj = {r: 0, g: 0, b: 0, a: 1}) {
+            return "rgb(" + (255 - obj.r) + ", " + (255 - obj.g) + ", " + (255 - obj.b) + ")";
+        }
+
+        let rgb = colorTrans(color);
+        let wgb = colorFix(color);
+        let str = "<div id='colorBox'><h3>调色板</h3>" +
+            "<cline><input type='range' id='cr' min='0' step='1' max='255' value='" + color.r + "' /><cval>" + color.r + "</cval></cline>" +
+            "<cline><input type='range' id='cg' min='0' step='1' max='255' value='" + color.g + "' /><cval>" + color.g + "</cval></cline>" +
+            "<cline><input type='range' id='cb' min='0' step='1' max='255' value='" + color.b + "' /><cval>" + color.b + "</cval></cline>" +
+            "<cline><input type='range' id='ca' min='0' step='0.01' max='1' value='" + color.a + "' /><cval>" + color.a + "</cval></cline>" +
+            "<cres></cres><div class='btn-box'><div class='false'>取消</div><div class='true'><span>确认</span></div></div></div>";
+        $("#mask").append($(str));
+        $("cres").css({backgroundColor: rgb, color: wgb}).html(rgb);
+        $("#cr, #cg, #cb, #ca").change(function () {
+            let k = $(this).attr("id")[1];
+            let v = $(this).val();
+            $(this).next("cval").html(v);
+            color[k] = v;
+            let nc = colorTrans(color);
+            let wc = colorFix(color);
+            $("cres").css({backgroundColor: nc, color: wc}).html(nc);
+        });
+        $("#colorBox div.false").click(function () {
+            $("#cr, #cg, #cb, #ca").val("");
+            $("#colorBox").remove();
+            maskChange(false);
+        });
+        $("#colorBox div.true").click(function () {
+            $("#cr, #cg, #cb, #ca").val("");
+            $("#colorBox").remove();
+            callback(color);
+            maskChange(false);
+        });
+
+        // 拖动
+        let dragging = false;
+        let pra = {};
+        $("#colorBox").mousedown(function (env) {
+            pra.X = env.pageX - $(this).offset().left;
+            pra.Y = env.pageY - $(this).offset().top;
+            dragging = pra.Y < 40 && pra.Y > 0;
+        }).mouseup(function () {
+            dragging = false;
+        }).mousemove(function (env) {
+            if (dragging)
+                $(this).css({top: env.pageY - pra.Y + "px", left: env.pageX - pra.X + "px"});
+        });
+    }
+
+    function modifyUser() {
+        maskChange();
+        let str = "<div id='userForm'><h2>个人信息修改</h2>" +
+            "<div class='input-box'><input type='text' maxlength='32' id='user-nick' value='" + DATA.user.nick + "' required><label>昵称</label></div>" +
+            "<div class='input-box'><input type='text' id='user-avatar' value='" + DATA.user.header + "' required><label>头像</label></div>" +
+            "<img id='h-res' src='" + DATA.user.header + "' alt='avatar'><div id='h-box'></div>" +
+            "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>修改</span></div></div></div>";
+        $("#mask").append($(str));
+
+        for (let i = 0; i < 10; i++) {
+            let one = "<img src='/static/img/header/" + i + ".jpg' alt='" + i + "'>";
+            $("#h-box").append($(one));
+        }
+        $("#user-avatar").blur(function () {
+            let u = $(this).val();
+            $("#h-res").attr({src: u});
+        });
+        $("#h-box>img").click(function () {
+            let u = "/static/img/header/" + $(this).attr("alt") + ".jpg";
+            $("#user-avatar").val(u);
+            $("#h-res").attr({src: u});
+        });
+
+        $("#userForm div.false").click(function () {
+            $("#userForm").remove();
+            maskChange(false);
+        });
+        $("#userForm div.true").click(function () {
+            updateUser({
+                nick: $("#user-nick").val(),
+                header: $("#user-avatar").val()
+            });
+            $("#userForm").remove();
+            maskChange(false);
+        });
+    }
+
     function eventListener() {
         // 差别监听：
         // diy page:
         $("#diy").click(function () {
-            if (DATA.logged) {
-                alert("You're about to DIY your page!");
-            } else {
-                alert("Please login first!", false);
-            }
+            if (DATA.logged) pageDiy();
+            else alert("Please login first!", false);
         });
 
         // self info:
         $("#update").click(function () {
-            if (DATA.logged) {
-                alert("You're about to change your info!");
-            } else {
-                alert("Please login first!", false);
-            }
+            if (DATA.logged) modifyUser();
+            else alert("Please login first!", false);
         });
 
         //login / logout:

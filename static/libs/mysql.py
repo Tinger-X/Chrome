@@ -27,8 +27,8 @@ class Users(Base):
     time = Column(String(64), default=nowTime())
     wallType = Column(Boolean, default=True)  # True for paper, False for color
     wallFilter = Column(Integer, default=1)
-    wallColor = Column(String(32), default="rgba(255, 255, 255, 1.0)")
-    wordColor = Column(String(32), default="rgba(0, 0, 0, 1.0)")
+    wallColor = Column(String(128), default="rgba(255, 255, 255, 1.0)")
+    wordColor = Column(String(128), default="rgba(0, 0, 0, 1.0)")
 
     __table_args__ = {
         "mysql_charset": "utf8"
@@ -104,43 +104,43 @@ def databasesInit():
             "id": randStr(16),
             "user": "TingerChromeSite",
             "site": "https://account.aliyun.com/login/login.html",
-            "icon": iconGet("https://account.aliyun.com/images/favicon.png"),
+            "icon": "https://account.aliyun.com/images/favicon.png",
             "name": "阿里云"
         }, {
             "id": randStr(16),
             "user": "TingerChromeSite",
             "site": "https://www.iconfont.cn/",
-            "icon": iconGet("https://www.iconfont.cn/"),
+            "icon": "https://www.iconfont.cn/favicon.ico",
             "name": "IconFont"
         }, {
             "id": randStr(16),
             "user": "TingerChromeSite",
             "site": "https://www.processon.com/diagrams/",
-            "icon": iconGet("https://www.processon.com/diagrams/"),
+            "icon": "https://www.processon.com/favicon.ico",
             "name": "ProcessOn"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "http://hdu.fanya.chaoxing.com/portal",
-            "icon": iconGet("http://hdu.fanya.chaoxing.com/portal"),
+            "icon": "http://hdu.fanya.chaoxing.com/favicon.ico",
             "name": "杭电泛雅"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "https://account.aliyun.com/login/login.html",
-            "icon": iconGet("https://account.aliyun.com/images/favicon.png"),
+            "icon": "https://account.aliyun.com/images/favicon.png",
             "name": "阿里云"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "https://www.iconfont.cn/",
-            "icon": iconGet("https://www.iconfont.cn/"),
+            "icon": "https://www.iconfont.cn/favicon.ico",
             "name": "IconFont"
         }, {
             "id": randStr(16),
             "user": "TingerMadeThisId",
             "site": "https://www.processon.com/diagrams/",
-            "icon": iconGet("https://www.processon.com/diagrams/"),
+            "icon": "https://www.processon.com/favicon.ico",
             "name": "ProcessOn"
         }
     ]

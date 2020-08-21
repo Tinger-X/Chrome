@@ -1,17 +1,14 @@
 kind: pipeline
-name: default
+type: docker
+name: Chrome
+workspace:
+  base: /srv/chrome
+  path: .
+
 steps:
-  - name: docker
-    image: plugins/docker
-    settings:
-      repo: Tinger/chrome
-      use_cache: true
-      username:
-        from_secret: Tinger
-      password:
-        from_secret: passwd
-    tags:
-      - latest
-when:
-  event: push
-  branch: master
+  - name: run
+    image: python3.8
+    commands:
+      - pwd
+      - ls
+      - pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt

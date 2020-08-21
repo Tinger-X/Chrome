@@ -588,7 +588,7 @@ $(document).ready(function () {
 
         // 添加static图像
         for (let i = 0; i < 10; i++) {
-            let one = "<img src='/static/img/wall/paper" + i + ".png' alt='" + i + "'>";
+            let one = "<img src='https://images.tinger.host/paper-" + i + ".png' alt='" + i + "'>";
             $("#backImgBox").append($(one));
         }
         $("#img-url").blur(function () {
@@ -596,7 +596,7 @@ $(document).ready(function () {
             $("#img-res").attr({src: u});
         });
         $("#backImgBox>img").click(function () {
-            let u = "/static/img/wall/paper" + $(this).attr("alt") + ".png";
+            let u = "https://images.tinger.host/paper-" + $(this).attr("alt") + ".png";
             $("#img-url").val(u);
             $("#img-res").attr({src: u});
         });
@@ -689,7 +689,7 @@ $(document).ready(function () {
         $("#mask").append($(str));
 
         for (let i = 0; i < 10; i++) {
-            let one = "<img src='/static/img/header/" + i + ".jpg' alt='" + i + "'>";
+            let one = "<img src='https://images.tinger.host/avatar-" + i + ".jpg' alt='" + i + "'>";
             $("#h-box").append($(one));
         }
         $("#user-avatar").blur(function () {
@@ -697,7 +697,7 @@ $(document).ready(function () {
             $("#h-res").attr({src: u});
         });
         $("#h-box>img").click(function () {
-            let u = "/static/img/header/" + $(this).attr("alt") + ".jpg";
+            let u = "https://images.tinger.host/avatar-" + $(this).attr("alt") + ".jpg";
             $("#user-avatar").val(u);
             $("#h-res").attr({src: u});
         });

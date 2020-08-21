@@ -21,8 +21,8 @@ class Users(Base):
     nick = Column(String(64))
     account = Column(String(64))
     passwd = Column(String(64))
-    header = Column(String(1024), default="/static/img/header/{0}.jpg".format(random.randint(0, 9)))
-    wallPaper = Column(String(1024), default="/static/img/wall/paper{0}.png".format(random.randint(0, 9)))
+    header = Column(String(1024), default="https://images.tinger.host/avatar-{0}.jpg".format(random.randint(0, 9)))
+    wallPaper = Column(String(1024), default="https://images.tinger.host/paper-{0}.png".format(random.randint(0, 9)))
     engine = Column(String(32), default="Google, Baidu, Bing, 360, Sogou")
     time = Column(String(64), default=nowTime())
     wallType = Column(Boolean, default=True)  # True for paper, False for color
@@ -83,19 +83,19 @@ def databasesInit():
         "account": "public-chrome",
         "passwd": "TingerChromeSite",
         "header": "/static/img/icon/user.png",
-        "wallPaper": "/static/img/wall/paper{0}.png".format(random.randint(0, 9))
+        "wallPaper": "https://images.tinger.host/paper-0.png".format(random.randint(0, 9))
     }
     Tinger = {
         "id": "TingerMadeThisId",
         "nick": "Tinger",
         "account": "Tinger",
         "passwd": "Tinger-chrome",
-        "header": "/static/img/header/5.jpg",
+        "header": "https://images.tinger.host/avatar-0.jpg",
         "wallType": False,
         "wallColor": "rgba(101, 37, 32, 0.9)",
         "wallFilter": 2,
         "wordColor": "rgba(255, 0, 0, 1)",
-        "wallPaper": "/static/img/wall/paper{0}.png".format(random.randint(0, 9))
+        "wallPaper": "https://images.tinger.host/paper-{0}.png".format(random.randint(0, 9))
     }
     addData(Users, [chrome, Tinger])
 

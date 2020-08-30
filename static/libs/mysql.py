@@ -176,10 +176,6 @@ def addUser(**prams):
     return nid
 
 
-def updateUser(**prams):
-    pass
-
-
 def mysqlTest():
     user = Users.query.get(g.uid)
     return table2json(user)

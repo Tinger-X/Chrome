@@ -55,8 +55,6 @@ def pramFilter(pram):
     """
     :param pram: dict of post
     :type pram: dict
-    :param log: for login?
-    :type log: bool
     """
     _all_ = [
         "nick", "header", "wallPaper", "engine", "wallType",

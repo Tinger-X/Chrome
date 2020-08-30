@@ -202,7 +202,9 @@ $(function () {
             "<div class='btn'><button id='cancel'>取消</button>" +
             "<button id='submit'>登录</button></div></div>");
         $("body").append(form);
-        $("#cancel").click(form.remove);
+        $("#cancel").click(function () {
+            form.remove();
+        });
         $("#submit").click(function () {
             Ajax.post({
                 url: "/login/",
@@ -228,7 +230,7 @@ $(function () {
         Ajax.get({
             url: "/logout/",
             success: function (res) {
-                if (res.status) reloadPage(res)
+                if (res.status) reloadPage(res);
                 else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
             },
             fail: function (err) {

@@ -17,6 +17,8 @@ def before():
         g.logged = True
         g.uid = session.get("auth")
     else:
+        session["auth"] = "Anybody"
+        session.permanent = False
         g.logged = False
         g.uid = "TingerChromeSite"
 
@@ -63,7 +65,13 @@ def newUser():
         session.permanent = True
         g.logged = True
         g.uid = nid
-        return redirect(url_for("getData"))
+        usr = Users.query.get(nid)
+        return jsonify({
+            "status": True,
+            "logged": True,
+            "user": table2json(usr),
+            "site": []
+        })
     # 验证失败
     Errs = []
     for err in form.errors:
@@ -96,7 +104,12 @@ def login():
         session.permanent = True
         g.logged = True
         g.uid = usr.id
-        return redirect(url_for("getData"))
+        return jsonify({
+            "status": True,
+            "logged": True,
+            "user": table2json(usr),
+            "site": table2json(usr.site)
+        })
     # 验证失败
     Errs = []
     for err in form.errors:
@@ -113,7 +126,13 @@ def logout():
     session.permanent = False
     g.logged = False
     g.uid = "TingerChromeSite"
-    return redirect(url_for("getData"))
+    usr = Users.query.get(g.uid)
+    return jsonify({
+        "status": True,
+        "logged": False,
+        "user": table2json(usr),
+        "site": table2json(usr.site)
+    })
 
 
 @app.route('/updateUser/', methods=['POST'])

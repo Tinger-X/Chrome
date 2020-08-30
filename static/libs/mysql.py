@@ -15,7 +15,7 @@ class Users(db.Model):
                           default="https://images.tinger.host/chrome-paper-{0}.png".format(random.randint(0, 9)))
     engine = db.Column(db.String(32), default="Google, Baidu, Bing, 360, Sogou")
     wallType = db.Column(db.Boolean, default=True)  # True for paper, False for color
-    wallFilter = db.Column(db.Enum("0", "1", "2", "3"), default="1")
+    wallFilter = db.Column(db.Integer, default=1)
     wallColor = db.Column(db.String(128), default="rgba(255, 255, 255, 1.0)")
     wordColor = db.Column(db.String(128), default="rgba(0, 0, 0, 1.0)")
 
@@ -90,7 +90,7 @@ def databasesInit():
         "header": "https://images.tinger.host/chrome-avatar-0.jpg",
         "wallType": False,
         "wallColor": "rgba(101, 37, 32, 0.9)",
-        "wallFilter": "0",
+        "wallFilter": 0,
         "wordColor": "rgba(255, 0, 0, 1.0)",
         "wallPaper": "https://img.zcool.cn/community/0387f7559bb8f32a801212fb7d965ce.jpg"
     }

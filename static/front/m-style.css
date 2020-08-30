@@ -1,0 +1,297 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    user-select: none;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-repeat: no-repeat;
+    background-position: center 0;
+    background-attachment: fixed;
+    background-size: cover;
+    -webkit-background-size: cover; /* 兼容Webkit内核浏览器如Chrome和Safari */
+    -o-background-size: cover; /* 兼容Opera */
+}
+
+#alertBox {
+    height: auto;
+    min-width: 50%;
+    max-width: 60%;
+    position: fixed;
+    top: 0;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.alert {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 8px;
+    background-color: gray;
+    margin: 5px 0;
+    animation: anim-in 0.5s;
+}
+
+@keyframes anim-in {
+    from {
+        margin-top: 25px;
+    }
+    to {
+        margin-top: 5px;
+    }
+}
+
+.alert > p {
+    margin-block-start: 4px;
+    margin-block-end: 4px;
+    margin-left: 10px;
+    font-size: 2.5em;
+    max-width: calc(100% - 60px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.alert > img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50px;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    margin-right: 10px;
+}
+
+.alert > img:active {
+    padding: 2px;
+}
+
+nick {
+    font-size: 100px;
+    font-weight: 700;
+    margin: 40px 0;
+}
+
+#search {
+    width: 90%;
+    height: 4em;
+    margin: 20px 0;
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+#search > img {
+    width: 2em;
+    height: 2em;
+}
+
+#search > label {
+    width: 80%;
+    box-sizing: border-box;
+    padding-right: 18px;
+    border-right: 2px solid gray;
+}
+
+#input {
+    outline: none;
+    border: none;
+    width: 100%;
+    font-size: 2em;
+    background-color: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#input:focus::placeholder {
+    color: transparent;
+}
+
+#search {
+    outline: none;
+    border: none;
+}
+
+#engine img {
+    width: 2.4em;
+    height: 2.4em;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 1px 2px;
+    margin: 4px 0;
+}
+
+#content {
+    position: absolute;
+    display: none;
+}
+
+#content > i {
+    margin: 1px;
+}
+
+#engine:hover #content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#box {
+    width: 70%;
+    height: 1000px;
+    overflow-y: auto;
+    text-align: center;
+    margin-top: 20px;
+    z-index: 10;
+}
+
+.link {
+    width: 150px;
+    height: 170px;
+    border-radius: 5px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    margin: 5px 10px;
+    z-index: 15;
+}
+
+.link:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.link > .icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 50px;
+    box-sizing: border-box;
+    padding: 18px;
+    background-color: rgb(121, 201, 199);
+    box-shadow: 0 2px 5px gray;
+}
+
+.link > .icon > img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.link > p {
+    width: 95%;
+    line-height: 37px;
+    font-size: 25px;
+    white-space: nowrap;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    border-radius: 50px;
+    text-align: center;
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+#inout {
+    position: fixed;
+    bottom: 35px;
+    margin: 0 auto;
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 99;
+}
+
+#inout > img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50px;
+    box-shadow: 5px 5px 10px gray;
+}
+
+#inout > button {
+    width: 180px;
+    height: 70px;
+    font-size: 35px;
+    font-weight: 600;
+    border: 1px solid gray;
+    outline: none;
+    border-radius: 5px;
+    background-color: rgb(26, 115, 232);
+    letter-spacing: 5px;
+    color: #FFFFFF;
+    box-sizing: border-box;
+    padding: 2px;
+    box-shadow: 5px 5px 10px gray;
+}
+
+#inout > button:active {
+    color: #000000;
+}
+
+#login {
+    position: fixed;
+    top: 500px;
+    width: 450px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    padding: 30px 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 50;
+}
+
+#login > h1 {
+    font-size: 50px;
+    margin-block-start: 10px;
+    margin-block-end: 20px;
+}
+
+#login > input {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    padding: 0 10px;
+    line-height: 2em;
+    font-size: 2em;
+    margin-top: 10px;
+    border: none;
+    outline: none;
+}
+
+#login > .btn {
+    width: 100%;
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#login > .btn > button {
+    width: 110px;
+    height: 50px;
+    font-size: 2em;
+    outline: none;
+    border-radius: 10px;
+}
+
+button#cancel {
+    background-color: gray;
+    color: #FFFFFF;
+}
+
+button#submit {
+    background-color: deepskyblue;
+    color: #000000;
+}

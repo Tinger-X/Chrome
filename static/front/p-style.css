@@ -142,11 +142,15 @@ body {
     height: 1em;
 }
 
+#search > label {
+    width: 80%;
+}
+
 #input {
     outline: none;
     border: none;
     height: 2em;
-    width: 80%;
+    width: 100%;
     font-size: 18px;
     background-color: transparent;
     font-family: 'Segoe UI', 'Roboto', arial, sans-serif;
@@ -274,8 +278,21 @@ div.link > p, .nav > add > p {
     z-index: 10;
 }
 
-#alert {
+#alertBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    bottom: 20px;
+    margin: 0 auto;
+    z-index: 99;
+}
+
+#alertBox > .alert {
     min-width: 300px;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     height: 2.2em;
     border-radius: 5px;
     display: flex;
@@ -284,21 +301,19 @@ div.link > p, .nav > add > p {
     align-items: center;
     box-sizing: border-box;
     padding: 0 5px;
-    position: fixed;
-    bottom: 20px;
-    margin: 0 auto;
+    margin: 5px 0;
     box-shadow: 0 3px 6px rgba(0, 0, 0, .16), 0 1px 2px rgba(0, 0, 0, .23);
-    z-index: 15;
+    z-index: 99;
 }
 
-#alert > img {
+#alertBox > .alert > img {
     width: 2em;
     height: 2em;
     border-radius: 50%;
     box-sizing: border-box;
 }
 
-#alert > img:hover {
+#alertBox > .alert > img:hover {
     background-color: black;
 }
 

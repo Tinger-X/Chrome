@@ -1,8 +1,38 @@
 $(document).ready(function () {
-    let DATA = {
+    const engineMap = {
+        Google: "https://www.google.com/search?ie=UTF-8&q=",
+        Baidu: "https://www.baidu.com/s?ie=UTF-8&wd=",
+        Bing: "https://cn.bing.com/search?FORM=CHROMN&q=",
+        360: "https://www.so.com/s?ie=UTF-8&q=",
+        Sogou: "https://www.sogou.com/web?ie=UTF-8&query="
+    };
+    const block = {width: 112, height: 128};
+    const Ajax = {
+        get: function (args) {
+            args["method"] = "get";
+            this.run(args);
+        },
+        post: function (args) {
+            args["method"] = "post";
+            this.run(args);
+        },
+        set: function () {
+            let token = $('meta[name=csrf-token]').attr('content');
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", token);
+                    }
+                }
+            });
+        },
+        run: function (args) {
+            this.set();
+            $.ajax(args);
+        }
+    };
+    let _data = {
         user: {
-            id: "",
-            passwd: "",
             header: "",
             nick: "",
             wordColor: "",
@@ -13,67 +43,50 @@ $(document).ready(function () {
             engine: ""
         },
         site: [],
-        status: false,
-        msg: "",
         logged: false
     };
-    const engineMap = {
-        Google: "https://www.google.com/search?ie=UTF-8&q=",
-        Baidu: "https://www.baidu.com/s?ie=UTF-8&wd=",
-        Bing: "https://cn.bing.com/search?FORM=CHROMN&q=",
-        360: "https://www.so.com/s?ie=UTF-8&q=",
-        Sogou: "https://www.sogou.com/web?ie=UTF-8&query="
-    };
-    const block = {width: 112, height: 128};
-    main().then();
+    getData(function (res) {
+        if (res["status"]) {
+            _data = res;
+            setData();
+            eventListener();
+        } else alert("Error!", false);
+    });
 
-    async function main() {
-        DATA = await getData();
-        console.log(DATA);
-        setData();
-        eventListener();
-    }
 
-    function getData() {
-        return new Promise((resolve => {
-            let judge = JSON.parse(localStorage.getItem("Tinger")) || false;
-            if (judge && judge.logged) resolve(judge);
-            else {
-                $.post("/login/", {account: "public-chrome", passwd: ""}, function (res) {
-                    if (res.status) {
-                        res.site = res.site.sort((a, b) => {
-                            return b.count - a.count;
-                        });
-                        localStorage.setItem("Tinger", JSON.stringify(res));
-                        resolve(res);
-                    } else alert(res.msg, false);
-                });
+    function getData(callback) {
+        Ajax.get({
+            url: "/getData/",
+            success: callback,
+            fail: function (err) {
+                console.log(err);
+                alert("Error", false);
             }
-        }));
+        })
     }
 
     function setData() {
-        if (DATA.logged) {  // 差别渲染
+        if (_data.logged) {  // 差别渲染
             $("#inout").html("注销");
         } else {
             $("#inout").html("登录/注册");
         }
 
         // 无差别渲染
-        $("#avatar").attr("src", DATA.user.header);  // header
-        $("#nick").html(DATA.user.nick).css("color", DATA.user.wordColor);  // nick
-        if (DATA.user.wallType) $("#body").css({  // background
+        $("#avatar").attr("src", _data.user.header);  // header
+        $("#nick").html(_data.user.nick).css("color", _data.user.wordColor);  // nick
+        if (_data.user.wallType) $("#body").css({  // background
             "backgroundColor": "none",
-            "backgroundImage": "url(" + DATA.user.wallPaper + ")",
-            "backdropFilter": "blur(" + DATA.user.wallFilter + "px)"
+            "backgroundImage": "url(" + _data.user.wallPaper + ")",
+            "backdropFilter": "blur(" + _data.user.wallFilter + "px)"
         });
         else $("#body").css({
             "backgroundImage": "none",
-            "backgroundColor": DATA.user.wallColor,
-            "backdropFilter": "blur(" + DATA.user.wallFilter + "px)"
+            "backgroundColor": _data.user.wallColor,
+            "backdropFilter": "blur(" + _data.user.wallFilter + "px)"
         });
         engineChange();
-        let ens = DATA.user.engine.split(', ');  // engine
+        let ens = _data.user.engine.split(', ');  // engine
         $("#select").attr({
             src: "/static/img/icon/" + ens[0] + ".png",
             alt: ens[0],
@@ -86,7 +99,7 @@ $(document).ready(function () {
                 title: ens[i + 1]
             });
         });
-        showSites(DATA.site);
+        showSites(_data.site);
     }
 
     function showSites(sites) {
@@ -99,7 +112,7 @@ $(document).ready(function () {
             for (let c = 0; c < pra.col; c++) {
                 let ind = r * pra.col + c;
                 if (ind < len) {
-                    let str = "<div class='nav' ind=" + ind + ">"
+                    let str = "<div class='nav' ind='" + ind + "' id='" + sites[ind].id + "'>"
                         + "<dot title='修改'>···</dot>"
                         + "<div class='link'>"
                         + "<img src='" + sites[ind].icon + "' alt='icon'>"
@@ -107,7 +120,7 @@ $(document).ready(function () {
                         + "</div>"
                         + "</div>";
                     line.append($(str));
-                } else if (DATA.logged) {
+                } else if (_data.logged) {
                     let add = "<div class='nav'><add><img src='/static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>";
                     line.append($(add));
                     break;
@@ -122,7 +135,7 @@ $(document).ready(function () {
         }, function () {
             $(this).css({backgroundColor: "transparent"}).prev().css({display: "none"});
         }).click(function () {
-            linkClicked($(this).parent().attr("ind"));
+            linkClicked($(this).parent().attr("ind"), $(this).parent().attr("id"));
         });
         // dot hover and click:
         $("dot").hover(function () {
@@ -137,7 +150,7 @@ $(document).ready(function () {
             }).next().css({backgroundColor: "transparent"});
         }).click(function () {
             let ind = $(this).parent().attr("ind");
-            if (DATA.logged) siteModify(ind);
+            if (_data.logged) siteModify(ind);
             else alert("Please login first!", false);
         });
         // add hover and click:
@@ -148,37 +161,49 @@ $(document).ready(function () {
         }).click(siteAdd);
     }
 
-    function linkClicked(index) {
-        let the = DATA.site[index];
-        the.count++;
-        updateSite(the);
-        window.location.href = the.site;
+    function linkClicked(ind, _id) {
+        Ajax.post({
+            url: "/siteClick/",
+            data: {id: _id},
+            success: function (res) {
+                if (res.status) console.log("res");
+                else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+            },
+            fail: function (err) {
+                console.log(err);
+                alert("Error", false);
+            }
+        });
+        window.location.href = _data.site[ind].site;
     }
 
     function updateSite(attrs) {
         // attrs => a changed site obj
-        for (let i = 0; i < DATA.site.length; i++) {
-            if (DATA.site[i].id === attrs.id) {
-                DATA.site[i] = attrs;
-                break;
+        let out = $(document.getElementById(attrs.id)).children("div.link");
+        out.children("img").attr({src: attrs.icon});
+        out.children("p").html(attrs.name);
+        Ajax.post({
+            url: "/updateSite/",
+            data: {
+                id: attrs.id,
+                name: attrs.name,
+                icon: attrs.icon,
+                site: attrs.site
+            },
+            success: function (res) {
+                if (res.status) console.log("res");
+                else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+            },
+            fail: function (err) {
+                console.log(err);
+                alert("Error", false);
             }
-        }
-        DATA.site = DATA.site.sort((a, b) => {
-            return b.count - a.count;
-        });
-        localStorage.setItem("Tinger", JSON.stringify(DATA));
-
-        showSites(DATA.site);
-        attrs.passwd = DATA.user.passwd;
-        $.post("/updateSite/", attrs, (res) => {
-            if (res.status) console.log(res);
-            else alert(res.msg, false);
         });
     }
 
     function siteModify(num) {
         maskChange();
-        let the = DATA.site[num];
+        let the = _data.site[num];
         let str = "<div id='formBox'><img src='/static/img/icon/close.png' alt='close'><h2>添加</h2><form id='mod-form'>" +
             "<div class='input-box'><input type='text' value='" + the.site + "' maxlength='1010' id='mod-url' required><label>网址</label></div>" +
             "<div class='input-box'><input type='text' value='" + the.name + "' maxlength='32' id='mod-name' required><label>名称</label></div>" +
@@ -209,22 +234,24 @@ $(document).ready(function () {
             maskChange(false);
         });
         $("#mod-form div.false").click(function () {
-            let pra = {
-                user: the.user,
-                passwd: DATA.user.passwd,
-                id: the.id
-            }
-            $.post("/deleteSite/", pra, function (res) {
-                if (res.status) {
-                    let list = [];
-                    for (let i = 0; i < DATA.site.length; i++) if (DATA.site[i].id !== the.id) list.push(DATA.site[i]);
-                    DATA.site = list;
-                    localStorage.setItem("Tinger", JSON.stringify(DATA));
-                    showSites(list);
-                    $("#mod-url, #mod-name, #mod-icon").val("");
-                    $("#formBox").remove();
-                    maskChange(false);
-                } else alert(res.msg, false);
+            Ajax.post({
+                url: "/deleteSite/",
+                data: {id: the.id},
+                success: function (res) {
+                    if (res.status) {
+                        let list = [];
+                        for (let i = 0; i < _data.site.length; i++) if (_data.site[i].id !== the.id) list.push(_data.site[i]);
+                        _data.site = list;
+                        showSites(list);
+                        $("#mod-url, #mod-name, #mod-icon").val("");
+                        $("#formBox").remove();
+                        maskChange(false);
+                    } else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+                },
+                fail: function (err) {
+                    console.log(err);
+                    alert("Error", false);
+                }
             });
         });
         $("#mod-form div.true").click(function () {
@@ -278,8 +305,8 @@ $(document).ready(function () {
             let jud = isURL(url.val());
             if (jud.judge) {
                 let pra = {
-                    user: DATA.user.id,
-                    passwd: DATA.user.passwd,
+                    user: _data.user.id,
+                    passwd: _data.user.passwd,
                     site: jud.str,
                     name: nam.val()
                 };
@@ -288,23 +315,30 @@ $(document).ready(function () {
                     redTip(nam);
                     can = false;
                 }
-                for (let i = 0; i < DATA.site.length; i++) {
-                    if (pra.site === DATA.site[i].site) {
+                for (let i = 0; i < _data.site.length; i++) {
+                    if (pra.site === _data.site[i].site) {
                         redTip(url);
                         can = false;
                         alert("网址重复", false);
                     }
                 }
                 if (can) {
-                    $.post("/addSite/", pra, function (res) {
-                        if (res.status) {
-                            DATA.site.push(res.data);
-                            localStorage.setItem("Tinger", JSON.stringify(DATA));
-                            reloadPage(DATA);
-                            $("#add-url, #add-name").val("");
-                            $("#formBox").remove();
-                            maskChange(false);
-                        } else alert(res.msg, false);
+                    Ajax.post({
+                        url: "/addSite/",
+                        data: pra,
+                        success: function (res) {
+                            if (res.status) {
+                                _data.site.push(res.data);
+                                reloadPage(_data);
+                                $("#add-url, #add-name").val("");
+                                $("#formBox").remove();
+                                maskChange(false);
+                            } else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+                        },
+                        fail: function (err) {
+                            console.log(err);
+                            alert("Error", false);
+                        }
                     });
                 }
             } else {
@@ -315,11 +349,8 @@ $(document).ready(function () {
     }
 
     function reloadPage(data) {
-        data.site = data.site.sort((a, b) => {
-            return b.count - a.count;
-        });
-        localStorage.setItem("Tinger", JSON.stringify(data));
-        DATA = JSON.parse(localStorage.getItem("Tinger"));
+        _data = data;
+        // console.log(_data);
         setData();
     }
 
@@ -334,7 +365,7 @@ $(document).ready(function () {
     }
 
     function engineChange(num = 0) {
-        let old = DATA.user.engine.split((", "));
+        let old = _data.user.engine.split((", "));
         let show = old[0];
         old[0] = old[num];
         old[num] = show;
@@ -344,14 +375,20 @@ $(document).ready(function () {
     }
 
     function updateUser(attrs) {
-        for (let key in attrs) DATA.user[key] = attrs[key];
-        localStorage.setItem("Tinger", JSON.stringify(DATA));
-        if (DATA.logged) {
-            attrs.id = DATA.user.id;
-            attrs.passwd = DATA.user.passwd;
-            $.post("/updateUser/", attrs, (res) => {
-                if (res.status) reloadPage(DATA);
-                else alert(res.msg, false);
+        const keys = Object.keys(attrs);
+        for (let key of keys) _data.user[key] = attrs[key];
+        if (_data.logged) {
+            Ajax.post({
+                url: "/updateUser/",
+                data: attrs,
+                success: function (res) {
+                    if (res.status) reloadPage(_data);
+                    else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+                },
+                fail: function (err) {
+                    console.log(err);
+                    alert("Error", false);
+                }
             });
         }
     }
@@ -427,13 +464,21 @@ $(document).ready(function () {
                 can = false;
             }
             if (can) {
-                $.post("/login/", pra, function (res) {
-                    if (res.status) {
-                        reloadPage(res);
-                        $("#login-account, #login-passwd").val("");
-                        $("#formBox").remove();
-                        maskChange(false);
-                    } else alert(res.msg, false);
+                Ajax.post({
+                    url: "/login/",
+                    data: pra,
+                    success: function (res) {
+                        if (res.status) {
+                            reloadPage(res);
+                            $("#login-account, #login-passwd").val("");
+                            $("#formBox").remove();
+                            maskChange(false);
+                        } else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+                    },
+                    fail: function (err) {
+                        alert("Error", false);
+                        console.log(err);
+                    }
                 });
             }
         });
@@ -479,7 +524,8 @@ $(document).ready(function () {
                         let pra = {
                             account: acc.val(),
                             nick: nik.val(),
-                            passwd: pwd.val()
+                            passwd: pwd.val(),
+                            repeat: rpt.val()
                         };
                         let can = true;
                         if (!pra.account) {
@@ -505,14 +551,22 @@ $(document).ready(function () {
                         }
 
                         if (can) {
-                            $.post("/newUser/", pra, function (res) {
-                                if (res.status) {
-                                    reloadPage(res);
-                                    $("#sin-account, #sin-nick, #sin-passwd, #sin-repeat").val("");
-                                    $("#formBox").remove();
-                                    maskChange(false);
-                                } else alert(res.msg, false);
-                            })
+                            Ajax.post({
+                                url: "/newUser/",
+                                data: pra,
+                                success: function (res) {
+                                    if (res.status) {
+                                        reloadPage(res);
+                                        $("#sin-account, #sin-nick, #sin-passwd, #sin-repeat").val("");
+                                        $("#formBox").remove();
+                                        maskChange(false);
+                                    } else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+                                },
+                                fail: function (err) {
+                                    alert("Error", false);
+                                    console.log(err);
+                                }
+                            });
                         }
                     });
                 }
@@ -521,23 +575,30 @@ $(document).ready(function () {
     }
 
     function userLogout() {
-        $.post("/login/", {account: "public-chrome", passwd: ""}, function (res) {
-            if (res.status) reloadPage(res);
-            else alert(res.msg, false);
+        Ajax.get({
+            url: "/logout/",
+            success: function (res) {
+                if (res.status) reloadPage(res)
+                else for (let i = 0; i < res["msgs"].length; i++) alert(res["msgs"][i], false);
+            },
+            fail: function (err) {
+                alert("Error", false);
+                console.log(err);
+            }
         });
     }
 
     function pageDiy() {
         maskChange();
         let str = "<div id='diyBox'><h2>页面自定义</h2><div class='filter-line'>" +
-            "<txt>模糊度</txt><input id='blur' type='range' value='" + DATA.user.wallFilter + "' min='0' max='3' step='1'>" +
-            "<txt>" + DATA.user.wallFilter + "</txt></div><div class='colorInputBox'>" +
-            "<div class='input-box'><input id='w-color' type='text' value='" + DATA.user.wordColor + "' maxlength='128' required><label>字体颜色</label></div>" +
+            "<txt>模糊度</txt><input id='blur' type='range' value='" + _data.user.wallFilter + "' min='0' max='3' step='1'>" +
+            "<txt>" + _data.user.wallFilter + "</txt></div><div class='colorInputBox'>" +
+            "<div class='input-box'><input id='w-color' type='text' value='" + _data.user.wordColor + "' maxlength='128' required><label>字体颜色</label></div>" +
             "<div id='wc-res'></div></div><div class='form-selector'><p id='b-img'>背景图</p><p id='b-color'>背景色</p></div><div id='backBox'></div>" +
             "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>修改</span></div></div></div>";
         $("#mask").append($(str));
 
-        $("#wc-res").css({backgroundColor: DATA.user.wordColor}).click(function () {
+        $("#wc-res").css({backgroundColor: _data.user.wordColor}).click(function () {
             colorSelect(function (res) {
                 res = colorTrans(res);
                 $("#w-color").val(res);
@@ -558,7 +619,7 @@ $(document).ready(function () {
         $("#b-color").click(function () {
             if (!$(this).hasClass("form-this")) atBackColor();
         });
-        if (DATA.user.wallType) atBackImg();
+        if (_data.user.wallType) atBackImg();
         else atBackColor();
 
         $("#diyBox div.false").click(function () {
@@ -582,13 +643,13 @@ $(document).ready(function () {
     function atBackImg() {
         $("#b-color").removeClass("form-this");
         $("#b-img").addClass("form-this");
-        let str = "<div class='input-box'><input id='img-url' type='text' value='" + DATA.user.wallPaper + "' required><label>URL</label></div>" +
-            "<img id='img-res' src='" + DATA.user.wallPaper + "' alt='wallpaper'><div id='backImgBox'></div>";
+        let str = "<div class='input-box'><input id='img-url' type='text' value='" + _data.user.wallPaper + "' required><label>URL</label></div>" +
+            "<img id='img-res' src='" + _data.user.wallPaper + "' alt='wallpaper'><div id='backImgBox'></div>";
         $("#backBox").empty().append($(str));
 
         // 添加static图像
         for (let i = 0; i < 10; i++) {
-            let one = "<img src='https://images.tinger.host/paper-" + i + ".png' alt='" + i + "'>";
+            let one = "<img src='https://images.tinger.host/chrome-paper-" + i + ".png' alt='" + i + "'>";
             $("#backImgBox").append($(one));
         }
         $("#img-url").blur(function () {
@@ -596,7 +657,7 @@ $(document).ready(function () {
             $("#img-res").attr({src: u});
         });
         $("#backImgBox>img").click(function () {
-            let u = "https://images.tinger.host/paper-" + $(this).attr("alt") + ".png";
+            let u = "https://images.tinger.host/chrome-paper-" + $(this).attr("alt") + ".png";
             $("#img-url").val(u);
             $("#img-res").attr({src: u});
         });
@@ -605,7 +666,7 @@ $(document).ready(function () {
     function atBackColor() {
         $("#b-img").removeClass("form-this");
         $("#b-color").addClass("form-this");
-        let str = "<div class='colorInputBox'><div class='input-box'><input id='backColor' type='text' maxlength='128' value='" + DATA.user.wallColor + "' required>" +
+        let str = "<div class='colorInputBox'><div class='input-box'><input id='backColor' type='text' maxlength='128' value='" + _data.user.wallColor + "' required>" +
             "<label>背景色</label></div><div id='bc-res'></div></div>";
         $("#backBox").empty().append($(str));
 
@@ -613,7 +674,7 @@ $(document).ready(function () {
             let c = $(this).val();
             $("#bc-res").css({backgroundColor: c});
         });
-        $("#bc-res").css({backgroundColor: DATA.user.wallColor}).click(function () {
+        $("#bc-res").css({backgroundColor: _data.user.wallColor}).click(function () {
             colorSelect(function (res) {
                 res = colorTrans(res);
                 $("#backColor").val(res);
@@ -682,14 +743,14 @@ $(document).ready(function () {
     function modifyUser() {
         maskChange();
         let str = "<div id='userForm'><h2>个人信息修改</h2>" +
-            "<div class='input-box'><input type='text' maxlength='32' id='user-nick' value='" + DATA.user.nick + "' required><label>昵称</label></div>" +
-            "<div class='input-box'><input type='text' id='user-avatar' value='" + DATA.user.header + "' required><label>头像</label></div>" +
-            "<img id='h-res' src='" + DATA.user.header + "' alt='avatar'><div id='h-box'></div>" +
+            "<div class='input-box'><input type='text' maxlength='32' id='user-nick' value='" + _data.user.nick + "' required><label>昵称</label></div>" +
+            "<div class='input-box'><input type='text' id='user-avatar' value='" + _data.user.header + "' required><label>头像</label></div>" +
+            "<img id='h-res' src='" + _data.user.header + "' alt='avatar'><div id='h-box'></div>" +
             "<div class='btn-box'><div class='false'>取消</div><div class='true'><span>修改</span></div></div></div>";
         $("#mask").append($(str));
 
         for (let i = 0; i < 10; i++) {
-            let one = "<img src='https://images.tinger.host/avatar-" + i + ".jpg' alt='" + i + "'>";
+            let one = "<img src='https://images.tinger.host/chrome-avatar-" + i + ".jpg' alt='" + i + "'>";
             $("#h-box").append($(one));
         }
         $("#user-avatar").blur(function () {
@@ -697,7 +758,7 @@ $(document).ready(function () {
             $("#h-res").attr({src: u});
         });
         $("#h-box>img").click(function () {
-            let u = "https://images.tinger.host/avatar-" + $(this).attr("alt") + ".jpg";
+            let u = "https://images.tinger.host/chrome-avatar-" + $(this).attr("alt") + ".jpg";
             $("#user-avatar").val(u);
             $("#h-res").attr({src: u});
         });
@@ -720,19 +781,19 @@ $(document).ready(function () {
         // 差别监听：
         // diy page:
         $("#diy").click(function () {
-            if (DATA.logged) pageDiy();
+            if (_data.logged) pageDiy();
             else alert("Please login first!", false);
         });
 
         // self info:
         $("#update").click(function () {
-            if (DATA.logged) modifyUser();
+            if (_data.logged) modifyUser();
             else alert("Please login first!", false);
         });
 
         //login / logout:
         $("#inout").click(() => {
-            if (DATA.logged) {
+            if (_data.logged) {
                 userLogout();
             } else {
                 userLogin();
@@ -780,7 +841,7 @@ $(document).ready(function () {
                     if (strUrl.judge) {
                         window.location = strUrl.str;
                     } else {
-                        let eng = engineMap[DATA.user.engine.split((", "))[0]];
+                        let eng = engineMap[_data.user.engine.split((", "))[0]];
                         window.location = eng + content;
                     }
                 }
@@ -811,25 +872,23 @@ $(document).ready(function () {
     }
 
     function alert(msg, type = true) {
-        maskChange();
-        let the = $("#alert");
-        if (the.length !== 1) {
-            the = $("<div id='alert'><p>" + msg + "</p><img src='/static/img/icon/close.png' alt='close'></div>");
-            $("#mask").append(the);
-        }
+        alertChange();
+        let box = $("#alertBox");
+        let alt = $("<div class='alert'><p>" + msg + "</p><img src='/static/img/icon/close.png' alt='close'></div>");
+        box.prepend(alt);
         let self = setTimeout(function () {
-            the.remove();
-            maskChange(false);
+            alt.remove();
+            alertChange(false);
         }, 1000);
-        if (type) the.css({backgroundColor: "rgba(128, 128, 128, 0.8)"});
+        if (type) alt.css({backgroundColor: "rgba(128, 128, 128, 0.8)"});
         else {
             clearTimeout(self);
-            the.css({backgroundColor: "rgba(255, 0, 0, 0.6)"});
+            alt.css({backgroundColor: "rgba(255, 0, 0, 0.6)"});
         }
-        $("#alert>img").click(function () {
+        $(".alert>img").click(function () {
             self && clearTimeout(self);
-            the.remove();
-            maskChange(false);
+            $(this).parent().remove();
+            alertChange(false);
         });
     }
 
@@ -839,6 +898,17 @@ $(document).ready(function () {
         setTimeout(function () {
             node.css({border: bord});
         }, time);
+    }
+
+    function alertChange(type = true) {
+        let box = $("#alertBox");
+        if (box.length === 0 && type) {
+            maskChange();
+            $("#mask").append($("<div id='alertBox'></div>"));
+        } else if (box.is(":empty") && !type) {
+            box.remove();
+            maskChange(false);
+        }
     }
 
     function maskChange(type = true) {

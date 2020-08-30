@@ -1,11 +1,15 @@
 import random
 import requests
+from functools import wraps
+from flask import redirect, url_for, g
+import datetime as DateTime
 from datetime import datetime
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup as BS
+from sqlalchemy.orm.collections import InstrumentedList as List
 
 
-def randStr(num, _map_=None):
+def randStr(num=16, _map_=None):
     """
     make a random string follow '_map_'
     :param num: length
@@ -23,10 +27,6 @@ def randStr(num, _map_=None):
     return res[:num]
 
 
-def nowTime():
-    return datetime.now()
-
-
 def listInclude(small, big):
     for item in small:
         if item not in big:
@@ -34,14 +34,33 @@ def listInclude(small, big):
     return True
 
 
+def table2json(table):
+    if isinstance(table, List):
+        return [eval(str(item)) for item in table]
+    else:
+        return eval(str(table))
+
+
+def login_required(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        if g.logged:
+            return func(*args, **kwargs)
+        return redirect(url_for("index"))
+
+    return inner
+
+
 def pramFilter(pram):
     """
     :param pram: dict of post
     :type pram: dict
+    :param log: for login?
+    :type log: bool
     """
     _all_ = [
-        "id", "nick", "account", "passwd", "header", "wallPaper", "engine", "wallType",
-        "wallFilter", "wallColor", "wordColor", "user", "site", "icon", "name", "count"
+        "nick", "header", "wallPaper", "engine", "wallType",
+        "wallFilter", "wallColor", "wordColor", "count"
     ]
     res = {}
     for key in pram.keys():
@@ -81,3 +100,8 @@ def iconGet(url):
                 return default
     except:
         return default
+
+
+def baseTest():
+    time = datetime.now() + DateTime.timedelta(hours=3)
+    print(time)

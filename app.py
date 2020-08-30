@@ -1,202 +1,237 @@
-from flask import Flask, render_template, jsonify, request, Response
+from flask import Flask, render_template, jsonify, request, Response, session
+from flask_wtf import CSRFProtect
+from static.libs.verify import LoginForm, SinForm, SiteForm, uSiteForm
 from static.libs.mysql import *
+from static.libs.exts import db
 
 app = Flask(__name__)
+app.config.from_pyfile("static/libs/config.py")
+CSRFProtect(app)
+db.init_app(app)
+
+
+@app.before_request
+def before():
+    g.mobile = request.user_agent.platform in ["android", "iphone", "ipad"]
+    if "auth" in session and session.get("auth") != "Anybody":
+        g.logged = True
+        g.uid = session.get("auth")
+    else:
+        g.logged = False
+        g.uid = "TingerChromeSite"
+
+
+@app.errorhandler(500)
+def serverError(err):
+    return render_template("error.html", err=err)
+
+
+@app.errorhandler(404)
+def pageLost(err):
+    return render_template("lost.html", err=err)
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if g.mobile:
+        return render_template("m-index.html")
+    return render_template("p-index.html")
 
 
-@app.route('/login/', methods=['POST'])
-def login():
-    pra = pramFilter(request.form.to_dict())
-    if not listInclude(["account", "passwd"], pra.keys()):
-        return jsonify({
-            "status": False,
-            "msg": "参数缺失"
-        })
-    if pra["account"] == "public-chrome" and pra["passwd"] == "":
-        return jsonify({
-            "status": True,
-            "msg": "注销成功",
-            "logged": False,
-            "user": searchDate(Users, id="TingerChromeSite")[0],
-            "site": searchDate(Sites, user="TingerChromeSite")
-        })
-    usr = searchDate(Users, **pra)
-    if not usr:
-        return jsonify({
-            "status": False,
-            "msg": "用户名或密码错误"
-        })
-    if usr[0]["passwd"] != pra["passwd"]:  # mysql不区分大小写，需要手动区分
-        return jsonify({
-            "status": False,
-            "msg": "密码错误"
-        })
+@app.route("/getData/")
+def getData():
+    usr = Users.query.get(g.uid)
     return jsonify({
         "status": True,
-        "msg": "登录成功",
-        "logged": True,
-        "user": usr[0],
-        "site": searchDate(Sites, user=usr[0]["id"])
-    })
-
-
-@app.route('/updateUser/', methods=['POST'])
-def updateUser():
-    pra = pramFilter(request.form.to_dict())
-    if not listInclude(["id", "passwd"], pra.keys()):
-        return jsonify({
-            "status": False,
-            "msg": "参数缺失"
-        })
-    if pra["id"] == "TingerChromeSite" and pra["passwd"] == "":
-        return jsonify({
-            "status": False,
-            "msg": "越权操作"
-        })
-    usr = searchDate(Users, id=pra["id"], passwd=pra["passwd"])
-    if not usr:
-        return jsonify({
-            "status": False,
-            "msg": "拒绝恶意操作"
-        })
-    if "wallType" in pra.keys():
-        pra["wallType"] = pra["wallType"] in [True, "true"]
-    modifyData(Users, pra["id"], **pra)
-    return jsonify({
-        "status": True,
-        "msg": "更新成功"
-    })
-
-
-@app.route('/updateSite/', methods=['POST'])
-def updateSite():
-    pra = pramFilter(request.form.to_dict())
-    if not listInclude(["user", "passwd", "id"], pra.keys()):
-        return jsonify({
-            "status": False,
-            "msg": "参数缺失"
-        })
-    if pra["user"] == "TingerChromeSite" and pra["passwd"] == "":
-        modifyData(Sites, pra["id"], count=pra["count"])
-        return jsonify({
-            "status": True,
-            "msg": "更新成功"
-        })
-    usr = searchDate(Users, id=pra["user"], passwd=pra["passwd"])
-    if not usr:
-        return jsonify({
-            "status": False,
-            "msg": "拒绝恶意操作"
-        })
-    del pra["user"]
-    del pra["passwd"]
-    modifyData(Sites, pra["id"], **pra)
-    return jsonify({
-        "status": True,
-        "msg": "更新成功"
-    })
-
-
-@app.route("/deleteSite/", methods=["POST"])
-def deleteSite():
-    pra = pramFilter(request.form.to_dict())
-    if not listInclude(["user", "passwd", "id"], pra.keys()):
-        return jsonify({
-            "status": False,
-            "msg": "参数缺失"
-        })
-    usr = searchDate(Users, id=pra["user"], passwd=pra["passwd"])
-    if not usr:
-        return jsonify({
-            "status": False,
-            "msg": "拒绝恶意操作"
-        })
-    deleteData(Sites, _id_=pra["id"])
-    return jsonify({
-        "status": True,
-        "msg": "删除成功"
+        "logged": g.logged,
+        "user": table2json(usr),
+        "site": table2json(usr.site)
     })
 
 
 @app.route('/newUser/', methods=['POST'])
 def newUser():
-    pra = pramFilter(request.form.to_dict())
-    if not listInclude(["account", "passwd", "nick"], pra.keys()):
-        return jsonify({
-            "status": False,
-            "msg": "参数缺失"
-        })
-    aly = searchDate(Users, account=pra["account"])
-    if aly:
-        return jsonify({
-            "status": False,
-            "msg": "用户已存在"
-        })
-    nid = randStr(random.randint(10, 16))
-    ext = searchDate(Users, id=nid)
-    while ext:
-        nid = randStr(random.randint(10, 16))
-        ext = searchDate(Users, id=nid)
-    addData(Users, {
-        "id": nid,
-        "account": pra["account"][:64],
-        "nick": pra["nick"][:64],
-        "passwd": pra["passwd"][:64],
-        "header": "/static/img/header/{0}.jpg".format(random.randint(0, 9)),
-        "wallPaper": "/static/img/wall/paper{0}.png".format(random.randint(0, 9))
+    form = SinForm(request.form)
+    if form.validate():
+        nid = addUser(nick=form.nick.data, account=form.account.data, passwd=form.passwd.data)
+        if not nid:
+            return jsonify({
+                "status": False,
+                "msgs": ["账户已注册"]
+            })
+        session["auth"] = nid
+        session.permanent = True
+        g.logged = True
+        g.uid = nid
+        return redirect(url_for("getData"))
+    # 验证失败
+    Errs = []
+    for err in form.errors:
+        Errs += form.errors[err]
+    return jsonify({
+        "status": False,
+        "msgs": Errs
     })
+
+
+@app.route('/login/', methods=['POST'])
+def login():
+    # 登录验证
+    form = LoginForm(request.form)
+    if form.validate():
+        account = form.account.data
+        passwd = form.passwd.data
+        usr = Users.query.filter_by(account=account).first()
+        if not usr:
+            return jsonify({
+                "status": False,
+                "msgs": ["账户未注册"]
+            })
+        if not usr.check_passwd(passwd):
+            return jsonify({
+                "status": False,
+                "msgs": ["密码错误"]
+            })
+        session["auth"] = usr.id
+        session.permanent = True
+        g.logged = True
+        g.uid = usr.id
+        return redirect(url_for("getData"))
+    # 验证失败
+    Errs = []
+    for err in form.errors:
+        Errs += form.errors[err]
+    return jsonify({
+        "status": False,
+        "msgs": Errs
+    })
+
+
+@app.route("/logout/")
+def logout():
+    session["auth"] = "Anybody"
+    session.permanent = False
+    g.logged = False
+    g.uid = "TingerChromeSite"
+    return redirect(url_for("getData"))
+
+
+@app.route('/updateUser/', methods=['POST'])
+@login_required
+def updateUser():
+    pra = pramFilter(request.form.to_dict())
+    if "wallType" in pra.keys():
+        pra["wallType"] = pra["wallType"] == "true"
+    db.session.query(Users).filter(Users.id == g.uid).update(pra)
+    db.session.commit()
     return jsonify({
         "status": True,
-        "msg": "注册并登录成功",
-        "logged": True,
-        "user": searchDate(Users, id=nid)[0],
-        "site": []
+        "msgs": ["更新成功"]
     })
 
 
 @app.route('/addSite/', methods=['POST'])
+@login_required
 def addSite():
-    pra = pramFilter(request.form.to_dict())
-    if not listInclude(["user", "passwd", "site", "name"], pra.keys()):
-        return jsonify({
-            "status": False,
-            "msg": "参数缺失"
-        })
-    usr = searchDate(Users, id=pra["user"], passwd=pra["passwd"])
-    if not usr:
-        return jsonify({
-            "status": False,
-            "msg": "拒绝恶意操作"
-        })
-    sit = searchDate(Sites, user=pra["user"], site=pra["site"])
-    if sit:
-        return jsonify({
-            "status": False,
-            "msg": "重复添加"
-        })
-    nid = randStr(random.randint(10, 16))
-    ext = searchDate(Sites, id=nid)
-    while ext:
+    form = SiteForm(request.form)
+    if form.validate():
+        name = form.name.data
+        site = form.site.data
+        sit = Sites.query.filter_by(uid=g.uid, site=site).first()
+        if sit:
+            return jsonify({
+                "status": False,
+                "msgs": ["重复添加"]
+            })
+
         nid = randStr(random.randint(10, 16))
-        ext = searchDate(Sites, id=nid)
-    res = {
-        "id": nid,
-        "user": pra["user"],
-        "site": pra["site"],
-        "icon": iconGet(pra["site"]),
-        "name": pra["name"],
-        "count": 0
-    }
-    addData(Sites, res)
+        ext = Sites.query.get(nid)
+        while ext:
+            nid = randStr(random.randint(10, 16))
+            ext = Sites.query.get(nid)
+        ste = Sites(**{
+            "id": nid,
+            "uid": g.uid,
+            "site": site,
+            "icon": iconGet(site),
+            "name": name,
+            "count": 0
+        })
+        db.session.add(ste)
+        db.session.commit()
+        return jsonify({
+            "status": True,
+            "data": table2json(Sites.query.get(nid))
+        })
+    # 验证失败
+    Errs = []
+    for err in form.errors:
+        Errs += form.errors[err]
+    return jsonify({
+        "status": False,
+        "msgs": Errs
+    })
+
+
+@app.route("/siteClick/", methods=["GET", "POST"])
+def siteClick():
+    sid = request.form.get("id")
+    site = Sites.query.get(sid)
+    site.count += 1
+    db.session.commit()
+    return jsonify({
+        "status": True
+    })
+
+
+@app.route('/updateSite/', methods=['POST'])
+@login_required
+def updateSite():
+    form = uSiteForm(request.form)
+    if form.validate():
+        sit = Sites.query.get(form.id.data)
+        if sit.uid != g.uid:
+            return jsonify({
+                "status": False,
+                "msgs": ["Bad authentic request."]
+            })
+        sit.name = form.name.data
+        sit.site = form.site.data
+        sit.icon = form.icon.data
+        db.session.commit()
+        return jsonify({
+            "status": True
+        })
+    # 验证失败
+    Errs = []
+    for err in form.errors:
+        Errs += form.errors[err]
+    return jsonify({
+        "status": False,
+        "msgs": Errs
+    })
+
+
+@app.route("/deleteSite/", methods=["POST"])
+@login_required
+def deleteSite():
+    sid = request.form.get("id") or False
+    if not sid:
+        return jsonify({
+            "status": False,
+            "msgs": ['Bad authentic request!']
+        })
+    sit = Sites.query.get(sid)
+    if sit.uid != g.uid:
+        return jsonify({
+            "status": False,
+            "msgs": ["Bad authentic request."]
+        })
+    db.session.delete(sit)
+    db.session.commit()
     return jsonify({
         "status": True,
-        "msg": "添加成功",
-        "data": res
+        "msgs": ["删除成功"]
     })
 
 
@@ -205,6 +240,26 @@ def icon(url):
     # https://favicon.link/
     img = requests.get("https://favicon.link/" + url).content
     return Response(img, mimetype="image/x-png")
+
+
+@app.route("/serviceInit/")
+def appInit():
+    con = {}
+    if session.get("auth") == "TingerChromeSite":
+        databasesInit()
+        session.clear()
+        usr = mysqlTest()
+        con["status"] = True
+        con["msg"] = "Initialize success!"
+        con["nick"] = usr["nick"]
+        con["wColor"] = usr["wordColor"]
+        con["bColor"] = usr["wallColor"]
+    else:
+        con["status"] = False
+        con["msg"] = "Bad authentic!"
+        con["wColor"] = "red"
+        con["bColor"] = "skyblue"
+    return render_template("init.html", **con)
 
 
 if __name__ == '__main__':

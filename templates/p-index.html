@@ -3,12 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Chrome index</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Chrome Index</title>
     <link rel="shortcut icon" href="/static/img/icon/favorite.png">
-    <link rel="stylesheet" href="/static/front/style.css">
+    <link rel="stylesheet" href="/static/front/p-style.css">
     <script src="/static/front/jquery.js"></script>
     <script src="/static/front/verify.js"></script>
-    <script src="/static/front/script.js"></script>
+    <script src="/static/front/p-script.js"></script>
 </head>
 
 <body id="body">
@@ -26,10 +27,10 @@
         </div>
     </div>
 </div>
-<div id="nick">Chrome</div>
+<div id="nick"></div>
 <div id="search">
     <img src="/static/img/icon/search.png" alt="search">
-    <input id="input" autocomplete="off" tabindex="1">
+    <label for="input"><input id="input" autocomplete="off" tabindex="1"></label>
     <div id="engine">
         <img id="select" src="/static/img/icon/Google.png" alt="google" title="Google">
         <div id="content">
@@ -40,8 +41,7 @@
         </div>
     </div>
 </div>
-<div id="box">
-</div>
+<div id="box"></div>
 <div id="mask"></div>
 </body>
 

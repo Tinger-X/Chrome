@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, Response, session
+from flask import Flask, render_template, jsonify, Response, request, session
 from flask_wtf import CSRFProtect
 from static.libs.verify import LoginForm, SinForm, SiteForm, uSiteForm
 from static.libs.mysql import *
@@ -17,8 +17,6 @@ def before():
         g.logged = True
         g.uid = session.get("auth")
     else:
-        session["auth"] = "Anybody"
-        session.permanent = False
         g.logged = False
         g.uid = "TingerChromeSite"
 
@@ -192,7 +190,7 @@ def addSite():
     })
 
 
-@app.route("/siteClick/", methods=["GET", "POST"])
+@app.route("/siteClick/", methods=["POST"])
 def siteClick():
     sid = request.form.get("id")
     site = Sites.query.get(sid)
@@ -279,6 +277,25 @@ def appInit():
         con["wColor"] = "red"
         con["bColor"] = "skyblue"
     return render_template("init.html", **con)
+
+
+@app.route("/set/")
+def sets():
+    res = {}
+    for i in range(10):
+        key = randStr(5)
+        res[key] = randStr()
+        session[key] = res[key]
+    return jsonify(res)
+
+
+@app.route("/read/")
+def read():
+    res = {}
+    for key in session.keys():
+        res[key] = session.get(key)
+    return jsonify(res)
+    # print(session.get("token"), request.headers.get("X-CSRFToken"))
 
 
 if __name__ == '__main__':

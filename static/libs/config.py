@@ -1,8 +1,7 @@
-import os
 from datetime import timedelta
 
-DEBUG = True
-SECRET_KEY = os.urandom(24)
+DEBUG = False
+SECRET_KEY = "this-is_the@secret#key*for&session"
 TEMPLATES_AUTO_RELOAD = True
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 PERMANENT_SESSION_LIFETIME = timedelta(days=7)

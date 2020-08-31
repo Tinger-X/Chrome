@@ -600,10 +600,10 @@ $(document).ready(function () {
 
         $("#wc-res").css({backgroundColor: _data.user.wordColor}).click(function () {
             colorSelect(function (res) {
-                res = colorTrans(res);
+                res = obj2rgb(res);
                 $("#w-color").val(res);
                 $("#wc-res").css({backgroundColor: res});
-            });
+            }, rgb2obj(_data.user.wordColor));
         });
         $("#w-color").blur(function () {
             let c = $(this).val();
@@ -676,15 +676,25 @@ $(document).ready(function () {
         });
         $("#bc-res").css({backgroundColor: _data.user.wallColor}).click(function () {
             colorSelect(function (res) {
-                res = colorTrans(res);
+                res = obj2rgb(res);
                 $("#backColor").val(res);
                 $("#bc-res").css({backgroundColor: res});
-            });
+            }, rgb2obj(_data.user.wallColor));
         });
     }
 
-    function colorTrans(obj = {r: 0, g: 0, b: 0, a: 1}) {
+    function obj2rgb(obj = {r: 0, g: 0, b: 0, a: 1}) {
         return "rgba(" + obj.r + ", " + obj.g + ", " + obj.b + ", " + obj.a + ")";
+    }
+
+    function rgb2obj(str) {
+        let lis = str.split(", ");
+        return {
+            r: lis[0].split("(")[1],
+            g: lis[1],
+            b: lis[2],
+            a: lis[3].split(")")[0]
+        }
     }
 
     function colorSelect(callback, color = {r: 100, g: 100, b: 100, a: 1}) {
@@ -694,7 +704,7 @@ $(document).ready(function () {
             return "rgb(" + (255 - obj.r) + ", " + (255 - obj.g) + ", " + (255 - obj.b) + ")";
         }
 
-        let rgb = colorTrans(color);
+        let rgb = obj2rgb(color);
         let wgb = colorFix(color);
         let str = "<div id='colorBox'><h3>调色板</h3>" +
             "<cline><input type='range' id='cr' min='0' step='1' max='255' value='" + color.r + "' /><cval>" + color.r + "</cval></cline>" +
@@ -709,7 +719,7 @@ $(document).ready(function () {
             let v = $(this).val();
             $(this).next("cval").html(v);
             color[k] = v;
-            let nc = colorTrans(color);
+            let nc = obj2rgb(color);
             let wc = colorFix(color);
             $("cres").css({backgroundColor: nc, color: wc}).html(nc);
         });

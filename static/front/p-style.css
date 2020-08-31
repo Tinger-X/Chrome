@@ -9,6 +9,7 @@ body {
 }
 
 #body {
+    font-family: sans-serif, Arial;
     user-select: none;
     display: flex;
     flex-direction: column;
@@ -130,11 +131,12 @@ body {
     margin: 20px 0;
     border-radius: 50px;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
-    background-color: #ffffffc4;
-    border-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.7);
     box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+    box-sizing: border-box;
+    padding: 0 10px;
 }
 
 #search > img {

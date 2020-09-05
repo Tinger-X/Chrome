@@ -9,6 +9,8 @@
 > [drone官方文档](https://docs.drone.io/)  
 > [github OAuth application](https://github.com/settings/applications/new)  
 > [docker配置](https://www.runoob.com/docker/docker-compose.html)  
+> [drone部署Flask参考](https://www.it610.com/article/1282492403860652032.htm)  
 
 ## Undeveloped
+> 邮箱验证  
 > 密码找回 

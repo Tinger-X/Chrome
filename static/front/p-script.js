@@ -893,7 +893,7 @@ $(document).ready(function () {
         if (type) alt.css({backgroundColor: "rgba(128, 128, 128, 0.8)"});
         else {
             clearTimeout(self);
-            alt.css({backgroundColor: "rgba(255, 0, 0, 0.6)"});
+            alt.css({backgroundColor: "rgba(255, 0, 0, 0.8)"});
         }
         $(".alert>img").click(function () {
             self && clearTimeout(self);

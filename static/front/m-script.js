@@ -272,10 +272,10 @@ $(function () {
         let self = setTimeout(function () {
             one.remove();
         }, 1000);
-        if (type) one.css({backgroundColor: "rgba(128, 128, 128, 0.8)"});
+        if (type) one.css({backgroundColor: "rgba(128, 128, 128, 0.9)"});
         else {
             clearTimeout(self);
-            one.css({backgroundColor: "rgba(255, 0, 0, 0.6)"});
+            one.css({backgroundColor: "rgba(255, 0, 0, 0.9)"});
         }
         $(".alert>img").click(function () {
             self && clearTimeout(self);

@@ -2,13 +2,38 @@ kind: pipeline
 type: docker
 name: Chrome
 workspace:
-  base: /srv/chrome
-  path: .
+  path: /srv/chrome
 
 steps:
-  - name: run
-    image: python3.8
-    commands:
-      - pwd
-      - ls
-      - pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+  # 将部署文件放入指定目录
+  - name: scp
+    image: appleboy/drone-scp
+    settings:
+      host: tinger.host
+      username: root
+      port: 22
+      password:
+        from_secret: ssh-passwd
+      target: /srv/Dockers/chrome/
+      source: .
+
+  # 部署项目
+  - name: publish
+    image: appleboy/drone-ssh
+    settings:
+      host: tinger.host
+      username: root
+      port: 22
+      password:
+        from_secret: ssh-passwd
+      script:
+        - cd /srv/Dockers/chrome/
+        - docker-compose down
+        - docker rmi chrome:latest
+        - docker-compose up -d
+
+trigger:
+  branch:
+    - master
+  event:
+    - push

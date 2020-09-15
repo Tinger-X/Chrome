@@ -104,29 +104,22 @@ $(document).ready(function () {
 
     function showSites(sites) {
         let box = $("#box");
-        let len = sites.length;
-        box.html("");
-        let pra = distribute(len);
-        for (let r = 0; r < pra.row; r++) {
-            let line = $("<div class='rows'></div>");
-            for (let c = 0; c < pra.col; c++) {
-                let ind = r * pra.col + c;
-                if (ind < len) {
-                    let str = "<div class='nav' ind='" + ind + "' id='" + sites[ind].id + "'>"
-                        + "<dot title='修改'>···</dot>"
-                        + "<div class='link'>"
-                        + "<img src='" + sites[ind].icon + "' alt='icon'>"
-                        + "<p>" + sites[ind].name + "</p>"
-                        + "</div>"
-                        + "</div>";
-                    line.append($(str));
-                } else if (_data.logged) {
-                    let add = "<div class='nav'><add><img src='/static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>";
-                    line.append($(add));
-                    break;
-                }
+        let len = sites.length + (_data.logged ? 1 : 0);
+        let width = Math.ceil(len / Math.ceil(len / 10)) * block.width;  // width = ceil(len/行数) * w
+        box.css("width", width + "px").html("");
+        for (let i = 0; i < len; i++) {
+            if (i === len - 1 && _data.logged) {
+                box.append($("<div class='nav'><add><img src='/static/img/icon/add.png' alt='add'><p>+添加+</p></add></div>"));
+            } else {
+                let str = "<div class='nav' ind='" + i + "' id='" + sites[i].id + "'>"
+                    + "<dot title='修改'>···</dot>"
+                    + "<div class='link'>"
+                    + "<img src='" + sites[i].icon + "' alt='icon'>"
+                    + "<p>" + sites[i].name + "</p>"
+                    + "</div>"
+                    + "</div>";
+                box.append($(str));
             }
-            box.append(line);
         }
 
         // re-listen: link hover and click:
@@ -352,16 +345,6 @@ $(document).ready(function () {
         _data = data;
         // console.log(_data);
         setData();
-    }
-
-    function distribute(num) {
-        let col = Math.ceil(Math.sqrt(block.height / block.width * (num + 1)));
-        let row = Math.ceil((num + 1) / col);
-        $("#box").css({width: col * block.width + "px", height: row * block.height + "px"});
-        return {
-            row: row,
-            col: col
-        }
     }
 
     function engineChange(num = 0) {

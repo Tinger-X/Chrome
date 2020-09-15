@@ -199,18 +199,14 @@ body {
 #box {
     max-height: 384px;
     overflow-y: auto;
-    max-width: 800px;
-    min-width: 400px;
-}
-
-.rows {
-    display: flex;
-    justify-content: center;
+    max-width: 1200px;
+    text-align: center;
 }
 
 .nav {
     width: 112px;
     height: 128px;
+    display: inline-flex;
     position: relative;
     box-sizing: border-box;
     padding: 4px;

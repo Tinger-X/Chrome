@@ -178,6 +178,7 @@ body {
 
 #engine img {
     width: 1.2em;
+    height: 1.2em;
     border-radius: 2px;
     background-color: rgba(255, 255, 255, 0.8);
     padding: 1px 2px;
@@ -384,7 +385,7 @@ p.form-this {
     border: 1px solid transparent;
     outline: none;
     border-radius: 4px;
-    background: rgb(241, 243, 244);
+    background-color: rgb(230, 230, 230);
 }
 
 .input-box > label {

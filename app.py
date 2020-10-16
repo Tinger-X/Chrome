@@ -279,24 +279,5 @@ def appInit():
     return render_template("init.html", **con)
 
 
-@app.route("/set/")
-def sets():
-    res = {}
-    for i in range(10):
-        key = randStr(5)
-        res[key] = randStr()
-        session[key] = res[key]
-    return jsonify(res)
-
-
-@app.route("/read/")
-def read():
-    res = {}
-    for key in session.keys():
-        res[key] = session.get(key)
-    return jsonify(res)
-    # print(session.get("token"), request.headers.get("X-CSRFToken"))
-
-
 if __name__ == '__main__':
     app.run()

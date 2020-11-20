@@ -119,6 +119,7 @@ def login():
 
 
 @app.route("/logout/")
+@login_required
 def logout():
     session["auth"] = "Anybody"
     session.permanent = False
@@ -257,26 +258,6 @@ def icon(url):
     # https://favicon.link/
     img = requests.get("https://favicon.link/" + url).content
     return Response(img, mimetype="image/x-png")
-
-
-@app.route("/serviceInit/")
-def appInit():
-    con = {}
-    if session.get("auth") == "TingerChromeSite":
-        databasesInit()
-        session.clear()
-        usr = mysqlTest()
-        con["status"] = True
-        con["msg"] = "Initialize success!"
-        con["nick"] = usr["nick"]
-        con["wColor"] = usr["wordColor"]
-        con["bColor"] = usr["wallColor"]
-    else:
-        con["status"] = False
-        con["msg"] = "Bad authentic!"
-        con["wColor"] = "red"
-        con["bColor"] = "skyblue"
-    return render_template("init.html", **con)
 
 
 if __name__ == '__main__':

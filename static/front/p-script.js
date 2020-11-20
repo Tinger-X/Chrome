@@ -632,7 +632,7 @@ $(document).ready(function () {
 
         // 添加static图像
         for (let i = 0; i < 10; i++) {
-            let one = "<img src='https://images.tinger.host/chrome-paper-" + i + ".png' alt='" + i + "'>";
+            let one = "<img src='http://static.tinger.host/image/chrome/paper/" + i + ".png' alt='" + i + "'>";
             $("#backImgBox").append($(one));
         }
         $("#img-url").blur(function () {
@@ -640,7 +640,7 @@ $(document).ready(function () {
             $("#img-res").attr({src: u});
         });
         $("#backImgBox>img").click(function () {
-            let u = "https://images.tinger.host/chrome-paper-" + $(this).attr("alt") + ".png";
+            let u = "http://static.tinger.host/image/chrome/paper/" + $(this).attr("alt") + ".png";
             $("#img-url").val(u);
             $("#img-res").attr({src: u});
         });
@@ -743,7 +743,7 @@ $(document).ready(function () {
         $("#mask").append($(str));
 
         for (let i = 0; i < 10; i++) {
-            let one = "<img src='https://images.tinger.host/chrome-avatar-" + i + ".jpg' alt='" + i + "'>";
+            let one = "<img src='http://static.tinger.host/image/chrome/avatar/" + i + ".jpg' alt='" + i + "'>";
             $("#h-box").append($(one));
         }
         $("#user-avatar").blur(function () {
@@ -751,7 +751,7 @@ $(document).ready(function () {
             $("#h-res").attr({src: u});
         });
         $("#h-box>img").click(function () {
-            let u = "https://images.tinger.host/chrome-avatar-" + $(this).attr("alt") + ".jpg";
+            let u = "http://static.tinger.host/image/chrome/avatar/" + $(this).attr("alt") + ".jpg";
             $("#user-avatar").val(u);
             $("#h-res").attr({src: u});
         });

@@ -23,12 +23,12 @@ def before():
 
 @app.errorhandler(500)
 def serverError(err):
-    return render_template("error.html", err=err)
+    return render_template("error.html", err=err), 500
 
 
 @app.errorhandler(404)
 def pageLost(err):
-    return render_template("lost.html", err=err)
+    return render_template("lost.html", err=err), 404
 
 
 @app.route('/')
@@ -258,6 +258,26 @@ def icon(url):
     # https://favicon.link/
     img = requests.get("https://favicon.link/" + url).content
     return Response(img, mimetype="image/x-png")
+
+
+@app.route("/serviceUpdate/")
+def appUpdate():
+    con = {}
+    if session.get("auth") == "TingerChromeSite":
+        databasesInit()
+        session.clear()
+        usr = mysqlTest()
+        con["status"] = True
+        con["msg"] = "Initialize success!"
+        con["nick"] = usr["nick"]
+        con["wColor"] = usr["wordColor"]
+        con["bColor"] = usr["wallColor"]
+    else:
+        con["status"] = False
+        con["msg"] = "Bad authentic!"
+        con["wColor"] = "red"
+        con["bColor"] = "skyblue"
+    return render_template("init.html", **con)
 
 
 if __name__ == '__main__':

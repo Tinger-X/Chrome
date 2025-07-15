@@ -1,5 +1,5 @@
 ## 项目说明
-**注**：参考：[cloudflare-web-nav](https://github.com/Tinger-X/cloudflare-web-nav)
+**注**：项目移动（更新换代）至 [cloudflare-web-nav](https://github.com/Tinger-X/cloudflare-web-nav)
 > 用于浏览器首页  
 > 仿Google首页，希望没侵权  
 > 将首页设置为 [https://chrome.tinger.host](https://chrome.tinger.host) 即可  
